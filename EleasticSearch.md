@@ -83,7 +83,7 @@
 
 ### 2.2、type（类型）
 
-<font color="Orange">注意：在 ElasticSearch8 中已经废弃，默认为 "_doc"</font>
+> <font color="Orange">注意：在 ElasticSearch8 中已经废弃，默认为 "_doc"</font>
 
 > 简易理解：MySQL 中的表
 
@@ -91,7 +91,7 @@
 
 ### 2.3、document（文档）
 
-<font color="Orange">注意：尽管一个文档，物理上存在于一个索引之中，文档必须被索引/赋予一个索引的type。</font>
+> <font color="Orange">注意：尽管一个文档，物理上存在于一个索引之中，文档必须被索引/赋予一个索引的type。</font>
 
 > 简易理解：MySQL 中的行记录
 
@@ -111,7 +111,7 @@
 
 ### 2.6、cluster（集群）
 
-<font color="Orange">注意：一个节点只能通过指定某个集群的名字来加入这个集群</font>
+> <font color="Orange">注意：一个节点只能通过指定某个集群的名字来加入这个集群</font>
 
 > 简易理解：Kubernetes 中的集群
 
@@ -159,9 +159,115 @@
 
 ### 2.10、文档得分
 
+$$
+score=(q,d) = coord(q,d)·queryNorm(q)·∑(tf(t in d)·idf(t)²·t.getBoot()·norm(t,d))
+$$
+
+> 公式中将查询作为输入，使用不同的手段来确定每一篇文档的得分，将每一个因素最后通过公式综合起来，返回该文档的最终得分。  
+
+> 查看得分情况：`GET /索引名称/_search?explain=true`
+
+![image-20240102165421156](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20240102165421156.png)
+
+#### 2.10.1、名词讲解
+
+* TF（Term Frequency）【词频】：搜索文本中的各个词条（term）在查询文本中出现了多少次，出现次数越多，就越相关，得分会比较高
+
+* IDF（Inverse Document Frequency）【逆文档频率】：搜索文本中的各个词条（term）在整个索引的所有文档中出现了多少次，出现的次数越多，说明越不重要，也就越不相关，得分就比较低。
 
 
 
+#### 2.10.2、TF 计算
+
+```json
+{
+    "value": 0.45454544,
+    "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+    "details": [
+        {
+            "value": 1,
+            "description": "freq, occurrences of term within document",
+            "details": []
+        },
+        {
+            "value": 1.2,
+            "description": "k1, term saturation parameter",
+            "details": []
+        },
+        {
+            "value": 0.75,
+            "description": "b, length normalization parameter",
+            "details": []
+        },
+        {
+            "value": 1,
+            "description": "dl, length of field",
+            "details": []
+        },
+        {
+            "value": 1,
+            "description": "avgdl, average length of field",
+            "details": []
+        }
+    ]
+}
+```
+
+
+
+$$
+freq / (freq + k1 * (1 - b + b * dl / avgdl))
+$$
+
+| 参数  | 含义                                             | 默认值 |
+| ----- | ------------------------------------------------ | ------ |
+| freq  | 文档中出现词条的次数                             | 无     |
+| k1    | 术语饱和参数                                     | 1.2    |
+| b     | 长度规格化参数（单词长度对于整个文档的影响程度） | 0.75   |
+| dl    | 当前文中分解的字段长度                           | 无     |
+| avgdl | 查询文档中分解字段数量/查询文档数量              | 无     |
+
+#### 2.10.3、IDF 计算
+
+```json
+{
+    "value": 1.3862944,
+    "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+    "details": [
+        {
+            "value": 1,
+            "description": "n, number of documents containing term",
+            "details": []
+        },
+        {
+            "value": 5,
+            "description": "N, total number of documents with field",
+            "details": []
+        }
+    ]
+}
+```
+
+$$
+log(1 + (N - n + 0.5) / (n + 0.5))
+$$
+
+| 参数 | 含义                                         | 默认值 |
+| ---- | -------------------------------------------- | ------ |
+| N    | 包含查询字段的文档总数（不一定包含查询词条） | 无     |
+| n    | 包含查询词条的文档数                         | 无     |
+
+#### 2.10.4、文档得分 计算
+
+$$
+boost * idf * tf
+$$
+
+| 参数  | 含义                 | 默认值                      |
+| ----- | -------------------- | --------------------------- |
+| boost | 词条权重             | 2.2（基础值） * 查询权重(1) |
+| idf   | 包含查询词条的文档数 | 无                          |
+| tf    | 词频                 | 无                          |
 
 
 
@@ -169,13 +275,544 @@
 
 ### 3.1、Elasticsearch配置文件（elasticsearch.yml）
 
+> 官方文档：https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html
+
 > 路径：$ES_HOME/config/elasticsearch.yml
 
 > 更改方法：`export ES_PATH_CONF=/path/to/my/config`
 
+```yaml
+# ======================== Elasticsearch Configuration =========================
+#
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please consult the documentation for further information on configuration options:
+# https://www.elastic.co/guide/en/elasticsearch/reference/index.html
+#
+# ---------------------------------- Cluster -----------------------------------
+# ---------------------------------- 集群配置 -----------------------------------
+# 集群名称，使用（默认注释）
+cluster.name: my-application
+
+# ------------------------------------ Node ------------------------------------
+# ------------------------------------ 节点 ------------------------------------
+# 节点名称（默认注释）
+node.name: node-1
+# 节点的自定义属性（默认注释）
+node.attr.rack: r1
+# 是否有资格选举 node
+node.master: true
+# 
+
+# ----------------------------------- Paths ------------------------------------
+# ----------------------------------- 路径集 ------------------------------------
+# 存储数据的目录路径（用逗号分隔多个位置）（默认注释）
+path.data: /path/to/data
+# 日志位置（默认注释）
+path.logs: /path/to/logs
+# 临时文件位置（默认注释）
+path.work: /path/to/work
+# 配置文件位置（默认注释）
+path.conf: /path/to/conf
+# 插件位置
+path.plugins: /path/to/plugins
+
+# ----------------------------------- Memory -----------------------------------
+# ----------------------------------- 内存 -----------------------------------
+# 启动时锁定内存（默认注释）
+bootstrap.memory_lock: true
+
+# ---------------------------------- Network -----------------------------------
+# ---------------------------------- 网络 -----------------------------------
+# 默认情况下，Elasticsearch 只能在本地主机上访问。 此处设置不同的地址以在网络上公开该节点：（默认注释）
+# 当填写时，ES假定从开发模式转向生产模式，并将许多系统启动检查从警告升级为异常
+network.host: 192.168.0.1
+# 默认情况下，Elasticsearch 在第一个空闲端口上侦听 HTTP 流量（默认注释）
+# 查找从 9200 开始。在此处设置特定的 HTTP 端口（默认注释）
+http.port: 9200
+
+# --------------------------------- Discovery ----------------------------------
+# --------------------------------- 发现 ----------------------------------
+# 传递初始主机列表以在该节点启动时执行发现：
+discovery.seed_hosts: ["host1", "host2"]
+# 使用一组初始的符合主节点资格的节点引导集群：
+cluster.initial_master_nodes: ["node-1", "node-2"]
+
+# ---------------------------------- Various -----------------------------------
+# ---------------------------------- 各种各样 -----------------------------------
+# Allow wildcard deletion of indices:
+action.destructive_requires_name: false
+
+#----------------------- BEGIN SECURITY AUTO CONFIGURATION -----------------------
+#----------------------- 开始安全自动配置 -----------------------
+#
+# The following settings, TLS certificates, and keys have been automatically      
+# generated to configure Elasticsearch security features on 29-12-2023 07:38:00
+#
+# --------------------------------------------------------------------------------
+
+# 是否启用安全特性
+xpack.security.enabled: true
+# 启用X-Pack安全特性中的Enrollment特性。该特性允许节点通过证书自动加入集群。
+xpack.security.enrollment.enabled: true
+
+# 为HTTP API客户端连接(如Kibana、Logstash和Agents)启用加密
+xpack.security.http.ssl:
+  # 表示启用SSL/TLS加密。
+  enabled: true
+  # 指定SSL证书文件的路径。
+  keystore.path: certs/http.p12
+
+# 开启集群节点间的加密和相互认证功能
+xpack.security.transport.ssl:
+  # 表示启用SSL/TLS加密。
+  enabled: true
+  # 表示使用证书进行节点身份验证。
+  verification_mode: certificate
+  # 指定SSL证书文件的路径。
+  keystore.path: certs/transport.p12
+  # 指定SSL信任证书库文件的路径。
+  truststore.path: certs/transport.p12
+
+# 仅使用当前节点创建一个新集群
+# 以后，其他节点仍然可以加入集群
+cluster.initial_master_nodes: ["DZ-PC"]
+
+# 监听地址，0.0.0.0 表示监听来自任何地方的 HTTP API 连接
+http.host: 0.0.0.0
+
+# 允许其他节点从任何地方加入集群
+# 连接经过加密并相互验证
+transport.host: 0.0.0.0
+
+#----------------------- END SECURITY AUTO CONFIGURATION -------------------------
+#----------------------- 结束安全自动配置 -------------------------
+```
+
+### 3.2、JVM配置文件（jvm.options）
+
+> 官方文档：
+>
+> https://www.oracle.com/java/technologies/javase/vmoptions-jsp.html
+>
+> https://www.elastic.co/guide/en/elasticsearch/reference/8.11/advanced-configuration.html#set-jvm-options
+>
+> https://www.elastic.co/guide/en/elasticsearch/reference/8.11/important-settings.html#heap-size-settings
+
+> 配置文件路径：$ES_HOME/config/jvm.options
+
+```properties
+################################################################
+##
+## JVM configuration
+##
+################################################################
+##
+## WARNING: DO NOT EDIT THIS FILE. If you want to override the
+## JVM options in this file, or set any additional options, you
+## should create one or more files in the jvm.options.d
+## directory containing your adjustments.
+##
+## See https://www.elastic.co/guide/en/elasticsearch/reference/8.11/jvm-options.html
+## for more information.
+##
+################################################################
 
 
 
+################################################################
+## IMPORTANT: JVM heap size
+################################################################
+##
+## The heap size is automatically configured by Elasticsearch
+## based on the available memory in your system and the roles
+## each node is configured to fulfill. If specifying heap is
+## required, it should be done through a file in jvm.options.d,
+## which should be named with .options suffix, and the min and
+## max should be set to the same value. For example, to set the
+## heap to 4 GB, create a new file in the jvm.options.d
+## directory containing these lines:
+##
+## -Xms4g
+## -Xmx4g
+##
+## See https://www.elastic.co/guide/en/elasticsearch/reference/8.11/heap-size.html
+## for more information
+##
+################################################################
+
+
+################################################################
+## Expert settings
+################################################################
+##
+## All settings below here are considered expert settings. Do
+## not adjust them unless you understand what you are doing. Do
+## not edit them in this file; instead, create a new file in the
+## jvm.options.d directory containing your adjustments.
+##
+################################################################
+
+# 启用 G1 垃圾回收器。
+-XX:+UseG1GC
+
+## JVM临时目录
+-Djava.io.tmpdir=${ES_TMPDIR}
+
+# 利用加速矢量硬件指令;移除这个可能
+# 导致矢量性能不太理想
+20-:--add-modules=jdk.incubator.vector
+
+# 当从Java堆分配失败时生成堆转储;堆转储将在JVM的工作目录中创建，除非指定了替代路径
+-XX:+HeapDumpOnOutOfMemoryError
+
+# 在内存不足错误发生堆转储后立即退出
+-XX:+ExitOnOutOfMemoryError
+
+# 指定堆转储的替代路径;确保目录存在并且有足够的空间
+-XX:HeapDumpPath=data
+
+# 为JVM致命错误日志指定一个替代路径
+-XX:ErrorFile=logs/hs_err_pid%p.log
+
+## GC日志记录
+-Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,level,pid,tags:filecount=32,filesize=64m
+```
+
+### 3.3、log4j2.properties
+
+> 官方文档：https://logging.apache.org/log4j/2.x/manual/configuration.html
+
+> 配置文件路径：$ES_HOME/config/log4j2.properties"
+
+```properties
+status = error
+
+# 指定了一个名为“console”的日志输出器类型
+appender.console.type = Console
+# 日志输出器的名称为“console”
+appender.console.name = console
+# 日志输出器使用PatternLayout来格式化日志内容。PatternLayout允许用户通过指定模式字符串来自定义日志输出的格式。
+appender.console.layout.type = PatternLayout
+# PatternLayout的具体格式化模式
+appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %m%consoleException%n
+
+######## Server JSON ############################
+# 输出日志的方式是滚动文件，即当文件达到一定条件（如大小或时间间隔）时会自动创建新的日志文件并保存旧日志。
+appender.rolling.type = RollingFile
+# 日志输出器的名字为"rolling"
+appender.rolling.name = rolling
+# 指定了日志输出的文件名。
+# ${sys:es.logs.base_path} 表示从系统环境变量 es.logs.base_path 中获取基础日志目录路径。
+# ${sys:file.separator} 是一个系统依赖的路径分隔符（例如Windows上的"\"或Unix上的"/"）。
+# ${sys:es.logs.cluster_name}_server.json 表示加上集群名称前缀以及"_server.json"后缀，最终形成完整日志文件名，格式为 <集群名称>_server.json，并且日志内容将以JSON格式编码。
+appender.rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_server.json
+
+# 日志输出的布局格式为ECSJsonLayout。ECS代表Elastic Common Schema，是一个标准化的日志数据结构，用于方便地将日志数据导入Elasticsearch进行统一管理和分析。
+appender.rolling.layout.type = ECSJsonLayout
+# 设置了日志布局的dataset属性为"elasticsearch.server"，这个值会在生成的JSON日志中作为顶级键值对"dataset": "elasticsearch.server"出现，有助于区分不同的日志类型，并便于在Elasticsearch中进行索引和过滤。
+appender.rolling.layout.dataset = elasticsearch.server
+
+# 定义滚动产生的新日志文件的命名规则。
+# ${sys:es.logs.base_path}${sys:file.separator}：使用系统环境变量es.logs.base_path确定的基础日志路径，然后用系统路径分隔符连接；
+# ${sys:es.logs.cluster_name}：日志所属的Elasticsearch集群名称；
+# %d{yyyy-MM-dd}：日期，格式为年-月-日；
+# %i：表示文件编号，当达到某个滚动条件时自动增加；
+# .json.gz：表示日志文件扩展名为.json.gz，即压缩后的JSON格式文件。
+appender.rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}-%i.json.gz
+
+# 声明该appender使用多个策略来决定何时滚动日志。
+appender.rolling.policies.type = Policies
+# 定义了一个基于时间的触发策略，表示当达到指定的时间间隔时触发滚动。
+appender.rolling.policies.time.type = TimeBasedTriggeringPolicy
+# 设置时间间隔为1，通常会和后面的modulate配合，实现每天或者每小时滚动一次。
+appender.rolling.policies.time.interval = 1
+# 表示根据时间间隔进行调制，确保文件名中的时间戳按小时或天平滑递增（例如每天或每小时生成一个新的文件）。
+appender.rolling.policies.time.modulate = true
+# 定义了一个基于文件大小的触发策略，表示当单个日志文件大小达到某个阈值时触发滚动。
+appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+# 设置单个日志文件的最大大小为128MB。
+appender.rolling.policies.size.size = 128MB
+
+# 使用默认的滚动策略，来管理文件编号和滚动过程。
+appender.rolling.strategy.type = DefaultRolloverStrategy
+# 表示没有文件编号的最大限制，即可以无限滚动。
+appender.rolling.strategy.fileIndex = nomax
+# 定义了一个删除动作，当不再需要某些旧日志文件时执行删除操作。
+appender.rolling.strategy.action.type = Delete
+# 指定要执行删除操作的日志文件的基础路径。
+appender.rolling.strategy.action.basepath = ${sys:es.logs.base_path}
+# 定义了一个基于文件名的条件，用于确定哪些文件应该被删除。
+appender.rolling.strategy.action.condition.type = IfFileName
+# 匹配所有以当前集群名称开头的日志文件。
+appender.rolling.strategy.action.condition.glob = ${sys:es.logs.cluster_name}-*
+# 定义了一个嵌套条件，基于累计文件大小判断是否需要删除。
+appender.rolling.strategy.action.condition.nested_condition.type = IfAccumulatedFileSize
+# 当所有匹配文件的总大小超过2GB时，执行删除动作，清除超出空间限制的旧日志文件。
+appender.rolling.strategy.action.condition.nested_condition.exceeds = 2GB
+################################################
+######## Server -  old style pattern ###########
+
+# 定义了这个日志输出器的类型为RollingFile，即滚动文件日志Appender。
+appender.rolling_old.type = RollingFile
+# 给这个日志输出器起名为"rolling_old"，可用于在其他配置段中引用。
+appender.rolling_old.name = rolling_old
+# 定义了日志文件的位置和名称。其中 ${sys:es.logs.base_path} 指定的是系统环境变量中定义的日志基本路径；${sys:file.separator} 根据操作系统使用相应的路径分隔符；${sys:es.logs.cluster_name}.log 表示日志文件名是以集群名称后跟".log"的形式。
+appender.rolling_old.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}.log
+# 说明该输出器的日志格式采用PatternLayout，可以自定义日志输出格式。
+appender.rolling_old.layout.type = PatternLayout
+# 定义了具体的日志输出格式
+# %d{ISO8601}：表示日志记录的时间，采用ISO8601格式
+appender.rolling_old.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %m%n
+# 
+appender.rolling_old.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}-%i.log.gz
+appender.rolling_old.policies.type = Policies
+appender.rolling_old.policies.time.type = TimeBasedTriggeringPolicy
+appender.rolling_old.policies.time.interval = 1
+appender.rolling_old.policies.time.modulate = true
+appender.rolling_old.policies.size.type = SizeBasedTriggeringPolicy
+appender.rolling_old.policies.size.size = 128MB
+appender.rolling_old.strategy.type = DefaultRolloverStrategy
+appender.rolling_old.strategy.fileIndex = nomax
+appender.rolling_old.strategy.action.type = Delete
+appender.rolling_old.strategy.action.basepath = ${sys:es.logs.base_path}
+appender.rolling_old.strategy.action.condition.type = IfFileName
+appender.rolling_old.strategy.action.condition.glob = ${sys:es.logs.cluster_name}-*
+appender.rolling_old.strategy.action.condition.nested_condition.type = IfAccumulatedFileSize
+appender.rolling_old.strategy.action.condition.nested_condition.exceeds = 2GB
+################################################
+
+rootLogger.level = info
+rootLogger.appenderRef.console.ref = console
+rootLogger.appenderRef.rolling.ref = rolling
+rootLogger.appenderRef.rolling_old.ref = rolling_old
+
+######## Deprecation JSON #######################
+appender.deprecation_rolling.type = RollingFile
+appender.deprecation_rolling.name = deprecation_rolling
+appender.deprecation_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_deprecation.json
+appender.deprecation_rolling.layout.type = ECSJsonLayout
+# Intentionally follows a different pattern to above
+appender.deprecation_rolling.layout.dataset = deprecation.elasticsearch
+appender.deprecation_rolling.filter.rate_limit.type = RateLimitingFilter
+
+appender.deprecation_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_deprecation-%i.json.gz
+appender.deprecation_rolling.policies.type = Policies
+appender.deprecation_rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.deprecation_rolling.policies.size.size = 1GB
+appender.deprecation_rolling.strategy.type = DefaultRolloverStrategy
+appender.deprecation_rolling.strategy.max = 4
+
+appender.header_warning.type = HeaderWarningAppender
+appender.header_warning.name = header_warning
+#################################################
+
+logger.deprecation.name = org.elasticsearch.deprecation
+logger.deprecation.level = WARN
+logger.deprecation.appenderRef.deprecation_rolling.ref = deprecation_rolling
+logger.deprecation.appenderRef.header_warning.ref = header_warning
+logger.deprecation.additivity = false
+
+######## Search slowlog JSON ####################
+appender.index_search_slowlog_rolling.type = RollingFile
+appender.index_search_slowlog_rolling.name = index_search_slowlog_rolling
+appender.index_search_slowlog_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs\
+  .cluster_name}_index_search_slowlog.json
+appender.index_search_slowlog_rolling.layout.type = ECSJsonLayout
+appender.index_search_slowlog_rolling.layout.dataset = elasticsearch.index_search_slowlog
+
+appender.index_search_slowlog_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs\
+  .cluster_name}_index_search_slowlog-%i.json.gz
+appender.index_search_slowlog_rolling.policies.type = Policies
+appender.index_search_slowlog_rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.index_search_slowlog_rolling.policies.size.size = 1GB
+appender.index_search_slowlog_rolling.strategy.type = DefaultRolloverStrategy
+appender.index_search_slowlog_rolling.strategy.max = 4
+#################################################
+
+#################################################
+logger.index_search_slowlog_rolling.name = index.search.slowlog
+logger.index_search_slowlog_rolling.level = trace
+logger.index_search_slowlog_rolling.appenderRef.index_search_slowlog_rolling.ref = index_search_slowlog_rolling
+logger.index_search_slowlog_rolling.additivity = false
+
+######## Indexing slowlog JSON ##################
+appender.index_indexing_slowlog_rolling.type = RollingFile
+appender.index_indexing_slowlog_rolling.name = index_indexing_slowlog_rolling
+appender.index_indexing_slowlog_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}\
+  _index_indexing_slowlog.json
+appender.index_indexing_slowlog_rolling.layout.type = ECSJsonLayout
+appender.index_indexing_slowlog_rolling.layout.dataset = elasticsearch.index_indexing_slowlog
+
+
+appender.index_indexing_slowlog_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}\
+  _index_indexing_slowlog-%i.json.gz
+appender.index_indexing_slowlog_rolling.policies.type = Policies
+appender.index_indexing_slowlog_rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.index_indexing_slowlog_rolling.policies.size.size = 1GB
+appender.index_indexing_slowlog_rolling.strategy.type = DefaultRolloverStrategy
+appender.index_indexing_slowlog_rolling.strategy.max = 4
+#################################################
+
+
+logger.index_indexing_slowlog.name = index.indexing.slowlog.index
+logger.index_indexing_slowlog.level = trace
+logger.index_indexing_slowlog.appenderRef.index_indexing_slowlog_rolling.ref = index_indexing_slowlog_rolling
+logger.index_indexing_slowlog.additivity = false
+
+
+logger.org_apache_pdfbox.name = org.apache.pdfbox
+logger.org_apache_pdfbox.level = off
+
+logger.org_apache_poi.name = org.apache.poi
+logger.org_apache_poi.level = off
+
+logger.org_apache_fontbox.name = org.apache.fontbox
+logger.org_apache_fontbox.level = off
+
+logger.org_apache_xmlbeans.name = org.apache.xmlbeans
+logger.org_apache_xmlbeans.level = off
+
+
+logger.com_amazonaws.name = com.amazonaws
+logger.com_amazonaws.level = warn
+
+logger.com_amazonaws_jmx_SdkMBeanRegistrySupport.name = com.amazonaws.jmx.SdkMBeanRegistrySupport
+logger.com_amazonaws_jmx_SdkMBeanRegistrySupport.level = error
+
+logger.com_amazonaws_metrics_AwsSdkMetrics.name = com.amazonaws.metrics.AwsSdkMetrics
+logger.com_amazonaws_metrics_AwsSdkMetrics.level = error
+
+logger.com_amazonaws_auth_profile_internal_BasicProfileConfigFileLoader.name = com.amazonaws.auth.profile.internal.BasicProfileConfigFileLoader
+logger.com_amazonaws_auth_profile_internal_BasicProfileConfigFileLoader.level = error
+
+logger.com_amazonaws_services_s3_internal_UseArnRegionResolver.name = com.amazonaws.services.s3.internal.UseArnRegionResolver
+logger.com_amazonaws_services_s3_internal_UseArnRegionResolver.level = error
+
+
+appender.audit_rolling.type = RollingFile
+appender.audit_rolling.name = audit_rolling
+appender.audit_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_audit.json
+appender.audit_rolling.layout.type = PatternLayout
+appender.audit_rolling.layout.pattern = {\
+                "type":"audit", \
+                "timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss,SSSZ}"\
+                %varsNotEmpty{, "cluster.name":"%enc{%map{cluster.name}}{JSON}"}\
+                %varsNotEmpty{, "cluster.uuid":"%enc{%map{cluster.uuid}}{JSON}"}\
+                %varsNotEmpty{, "node.name":"%enc{%map{node.name}}{JSON}"}\
+                %varsNotEmpty{, "node.id":"%enc{%map{node.id}}{JSON}"}\
+                %varsNotEmpty{, "host.name":"%enc{%map{host.name}}{JSON}"}\
+                %varsNotEmpty{, "host.ip":"%enc{%map{host.ip}}{JSON}"}\
+                %varsNotEmpty{, "event.type":"%enc{%map{event.type}}{JSON}"}\
+                %varsNotEmpty{, "event.action":"%enc{%map{event.action}}{JSON}"}\
+                %varsNotEmpty{, "authentication.type":"%enc{%map{authentication.type}}{JSON}"}\
+                %varsNotEmpty{, "user.name":"%enc{%map{user.name}}{JSON}"}\
+                %varsNotEmpty{, "user.run_by.name":"%enc{%map{user.run_by.name}}{JSON}"}\
+                %varsNotEmpty{, "user.run_as.name":"%enc{%map{user.run_as.name}}{JSON}"}\
+                %varsNotEmpty{, "user.realm":"%enc{%map{user.realm}}{JSON}"}\
+                %varsNotEmpty{, "user.realm_domain":"%enc{%map{user.realm_domain}}{JSON}"}\
+                %varsNotEmpty{, "user.run_by.realm":"%enc{%map{user.run_by.realm}}{JSON}"}\
+                %varsNotEmpty{, "user.run_by.realm_domain":"%enc{%map{user.run_by.realm_domain}}{JSON}"}\
+                %varsNotEmpty{, "user.run_as.realm":"%enc{%map{user.run_as.realm}}{JSON}"}\
+                %varsNotEmpty{, "user.run_as.realm_domain":"%enc{%map{user.run_as.realm_domain}}{JSON}"}\
+                %varsNotEmpty{, "user.roles":%map{user.roles}}\
+                %varsNotEmpty{, "apikey.id":"%enc{%map{apikey.id}}{JSON}"}\
+                %varsNotEmpty{, "apikey.name":"%enc{%map{apikey.name}}{JSON}"}\
+                %varsNotEmpty{, "authentication.token.name":"%enc{%map{authentication.token.name}}{JSON}"}\
+                %varsNotEmpty{, "authentication.token.type":"%enc{%map{authentication.token.type}}{JSON}"}\
+                %varsNotEmpty{, "cross_cluster_access":%map{cross_cluster_access}}\
+                %varsNotEmpty{, "origin.type":"%enc{%map{origin.type}}{JSON}"}\
+                %varsNotEmpty{, "origin.address":"%enc{%map{origin.address}}{JSON}"}\
+                %varsNotEmpty{, "realm":"%enc{%map{realm}}{JSON}"}\
+                %varsNotEmpty{, "realm_domain":"%enc{%map{realm_domain}}{JSON}"}\
+                %varsNotEmpty{, "url.path":"%enc{%map{url.path}}{JSON}"}\
+                %varsNotEmpty{, "url.query":"%enc{%map{url.query}}{JSON}"}\
+                %varsNotEmpty{, "request.method":"%enc{%map{request.method}}{JSON}"}\
+                %varsNotEmpty{, "request.body":"%enc{%map{request.body}}{JSON}"}\
+                %varsNotEmpty{, "request.id":"%enc{%map{request.id}}{JSON}"}\
+                %varsNotEmpty{, "action":"%enc{%map{action}}{JSON}"}\
+                %varsNotEmpty{, "request.name":"%enc{%map{request.name}}{JSON}"}\
+                %varsNotEmpty{, "indices":%map{indices}}\
+                %varsNotEmpty{, "opaque_id":"%enc{%map{opaque_id}}{JSON}"}\
+                %varsNotEmpty{, "trace.id":"%enc{%map{trace.id}}{JSON}"}\
+                %varsNotEmpty{, "x_forwarded_for":"%enc{%map{x_forwarded_for}}{JSON}"}\
+                %varsNotEmpty{, "transport.profile":"%enc{%map{transport.profile}}{JSON}"}\
+                %varsNotEmpty{, "rule":"%enc{%map{rule}}{JSON}"}\
+                %varsNotEmpty{, "put":%map{put}}\
+                %varsNotEmpty{, "delete":%map{delete}}\
+                %varsNotEmpty{, "change":%map{change}}\
+                %varsNotEmpty{, "create":%map{create}}\
+                %varsNotEmpty{, "invalidate":%map{invalidate}}\
+                }%n
+# "node.name" node name from the `elasticsearch.yml` settings
+# "node.id" node id which should not change between cluster restarts
+# "host.name" unresolved hostname of the local node
+# "host.ip" the local bound ip (i.e. the ip listening for connections)
+# "origin.type" a received REST request is translated into one or more transport requests. This indicates which processing layer generated the event "rest" or "transport" (internal)
+# "event.action" the name of the audited event, eg. "authentication_failed", "access_granted", "run_as_granted", etc.
+# "authentication.type" one of "realm", "api_key", "token", "anonymous" or "internal"
+# "user.name" the subject name as authenticated by a realm
+# "user.run_by.name" the original authenticated subject name that is impersonating another one.
+# "user.run_as.name" if this "event.action" is of a run_as type, this is the subject name to be impersonated as.
+# "user.realm" the name of the realm that authenticated "user.name"
+# "user.realm_domain" if "user.realm" is under a domain, this is the name of the domain
+# "user.run_by.realm" the realm name of the impersonating subject ("user.run_by.name")
+# "user.run_by.realm_domain" if "user.run_by.realm" is under a domain, this is the name of the domain
+# "user.run_as.realm" if this "event.action" is of a run_as type, this is the realm name the impersonated user is looked up from
+# "user.run_as.realm_domain" if "user.run_as.realm" is under a domain, this is the name of the domain
+# "user.roles" the roles array of the user; these are the roles that are granting privileges
+# "apikey.id" this field is present if and only if the "authentication.type" is "api_key"
+# "apikey.name" this field is present if and only if the "authentication.type" is "api_key"
+# "authentication.token.name" this field is present if and only if the authenticating credential is a service account token
+# "authentication.token.type" this field is present if and only if the authenticating credential is a service account token
+# "cross_cluster_access" this field is present if and only if the associated authentication occurred cross cluster
+# "event.type" informs about what internal system generated the event; possible values are "rest", "transport", "ip_filter" and "security_config_change"
+# "origin.address" the remote address and port of the first network hop, i.e. a REST proxy or another cluster node
+# "realm" name of a realm that has generated an "authentication_failed" or an "authentication_successful"; the subject is not yet authenticated
+# "realm_domain" if "realm" is under a domain, this is the name of the domain
+# "url.path" the URI component between the port and the query string; it is percent (URL) encoded
+# "url.query" the URI component after the path and before the fragment; it is percent (URL) encoded
+# "request.method" the method of the HTTP request, i.e. one of GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, TRACE, CONNECT
+# "request.body" the content of the request body entity, JSON escaped
+# "request.id" a synthetic identifier for the incoming request, this is unique per incoming request, and consistent across all audit events generated by that request
+# "action" an action is the most granular operation that is authorized and this identifies it in a namespaced way (internal)
+# "request.name" if the event is in connection to a transport message this is the name of the request class, similar to how rest requests are identified by the url path (internal)
+# "indices" the array of indices that the "action" is acting upon
+# "opaque_id" opaque value conveyed by the "X-Opaque-Id" request header
+# "trace_id" an identifier conveyed by the part of "traceparent" request header
+# "x_forwarded_for" the addresses from the "X-Forwarded-For" request header, as a verbatim string value (not an array)
+# "transport.profile" name of the transport profile in case this is a "connection_granted" or "connection_denied" event
+# "rule" name of the applied rule if the "origin.type" is "ip_filter"
+# the "put", "delete", "change", "create", "invalidate" fields are only present
+# when the "event.type" is "security_config_change" and contain the security config change (as an object) taking effect
+
+appender.audit_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_audit-%d{yyyy-MM-dd}-%i.json.gz
+appender.audit_rolling.policies.type = Policies
+appender.audit_rolling.policies.time.type = TimeBasedTriggeringPolicy
+appender.audit_rolling.policies.time.interval = 1
+appender.audit_rolling.policies.time.modulate = true
+appender.audit_rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.audit_rolling.policies.size.size = 1GB
+appender.audit_rolling.strategy.type = DefaultRolloverStrategy
+appender.audit_rolling.strategy.fileIndex = nomax
+
+logger.xpack_security_audit_logfile.name = org.elasticsearch.xpack.security.audit.logfile.LoggingAuditTrail
+logger.xpack_security_audit_logfile.level = info
+logger.xpack_security_audit_logfile.appenderRef.audit_rolling.ref = audit_rolling
+logger.xpack_security_audit_logfile.additivity = false
+
+logger.xmlsig.name = org.apache.xml.security.signature.XMLSignature
+logger.xmlsig.level = error
+logger.samlxml_decrypt.name = org.opensaml.xmlsec.encryption.support.Decrypter
+logger.samlxml_decrypt.level = fatal
+logger.saml2_decrypt.name = org.opensaml.saml.saml2.encryption.Decrypter
+logger.saml2_decrypt.level = fatal
+```
 
 ## 四、Kibana 使用
 
@@ -389,11 +1026,222 @@ DELETE /indexName
 
 ### 6.1、新增文档
 
-```http
+#### 6.1.1、方式一：自动生成ID
 
+```http
+POST /索引名/_doc
+{
+	"key": "value"
+}
+```
+
+![image-20231229160045214](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229160045214.png)
+
+```JSON
+{
+  "_index": "lindongzhai",       // 当前索引名称
+  "_id": "1taUtIwBwSyoWLhSLjGX", // 文档ID
+  "_version": 1,                 // 文档版本，增删改都会使版本产生变化
+  "result": "created",           // 操作结果，create（创建），update（更新），delete（删除）
+  "_shards": {                   // 分片信息
+    "total": 2,                  // 总分片数
+    "successful": 1,             // 成功分片数 
+    "failed": 0                  // 失败分片数
+  },
+  "_seq_no": 0,                  // 文档序列号，用于分布式环境种保证顺序性
+  "_primary_term": 1             // 主分片任期，用于确保在同一时间只有一个主分片处于活动状态，并保证变更操作的一致性。
+}
+```
+
+#### 6.1.2、方式二：指定ID
+
+```http
+POST /索引名/_doc/文档ID
+{
+	"key": "value"
+}
+```
+
+![image-20231229161533300](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229161533300.png)
+
+```json
+{
+  "_index": "lindongzhai",       // 当前索引名称
+  "_id": "001", 				 // 文档ID
+  "_version": 1,                 // 文档版本，增删改都会使版本产生变化
+  "result": "created",           // 操作结果，create（创建），update（更新），delete（删除）
+  "_shards": {                   // 分片信息
+    "total": 2,                  // 总分片数
+    "successful": 1,             // 成功分片数 
+    "failed": 0                  // 失败分片数
+  },
+  "_seq_no": 0,                  // 文档序列号，用于分布式环境种保证顺序性
+  "_primary_term": 1             // 主分片任期，用于确保在同一时间只有一个主分片处于活动状态，并保证变更操作的一致性。
+}
+```
+
+#### 6.1.3、方式三：使用 PUT 新增文档
+
+```http
+PUT /索引名称/_doc/文档ID
+{
+	"key": "value"
+}
+```
+
+![image-20231229163823898](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229163823898.png)
+
+```json
+{
+  "_index": "lindongzhai",       // 当前索引名称
+  "_id": "002", 				 // 文档ID
+  "_version": 1,                 // 文档版本，增删改都会使版本产生变化
+  "result": "created",           // 操作结果，create（创建），update（更新），delete（删除）
+  "_shards": {                   // 分片信息
+    "total": 2,                  // 总分片数
+    "successful": 1,             // 成功分片数 
+    "failed": 0                  // 失败分片数
+  },
+  "_seq_no": 0,                  // 文档序列号，用于分布式环境种保证顺序性
+  "_primary_term": 1             // 主分片任期，用于确保在同一时间只有一个主分片处于活动状态，并保证变更操作的一致性。
+}
 ```
 
 
+
+### 6.2、修改文档
+
+#### 6.2.1、方式一：修改所有字段
+
+>  <font color="Orange">注意：这种方式修改，如果不传所有字段，将会把未传的字段清空</font>
+
+```http
+POST /索引名称/_doc/文档ID
+{
+	"key": "value"
+}
+```
+
+![image-20231229164246167](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229164246167.png)
+
+```json
+{
+  "_index": "lindongzhai",       // 当前索引名称
+  "_id": "002", 				 // 文档ID
+  "_version": 1,                 // 文档版本，增删改都会使版本产生变化
+  "result": "update",            // 操作结果，create（创建），update（更新），delete（删除）
+  "_shards": {                   // 分片信息
+    "total": 2,                  // 总分片数
+    "successful": 1,             // 成功分片数 
+    "failed": 0                  // 失败分片数
+  },
+  "_seq_no": 0,                  // 文档序列号，用于分布式环境种保证顺序性
+  "_primary_term": 1             // 主分片任期，用于确保在同一时间只有一个主分片处于活动状态，并保证变更操作的一致性。
+}
+```
+
+#### 6.2.2、方式二：修改指定字段
+
+
+
+### 6.3、删除文档
+
+> <font color="Orange">注意：删除一个文档不会立即从磁盘上移除，它只是被标记成已删除（逻辑删除）</font>
+
+```http
+DELETE /索引名称/_doc/文档ID
+```
+
+![image-20231229165612343](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229165612343.png)
+
+```json
+{
+  "_index": "lindongzhai",  // 当前索引名称
+  "_id": "002",             // 文档ID
+  "_version": 2,            // 文档版本，增删改都会使版本产生变化
+  "result": "deleted",      // 操作结果，create（创建），update（更新），delete（删除）
+  "_shards": {              // 分片信息
+    "total": 2,             // 总分片数
+    "successful": 1,        // 成功分片数
+    "failed": 0             // 失败分片数
+  },
+  "_seq_no": 4,             // 文档序列号，用于分布式环境种保证顺序性
+  "_primary_term": 1        // 主分片任期，用于确保在同一时间只有一个主分片处于活动状态，并保证变更操作的一致性。
+}
+```
+
+### 6.4、查询文档
+
+#### 6.4.1、方式一：查询单个文档
+
+```http
+GET /索引名称/_doc/文档ID[?pretty=true]
+```
+
+![image-20231229165029235](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229165029235.png)
+
+```json
+{
+  "_index": "lindongzhai",  // 索引名称
+  "_id": "001",             // 文档ID
+  "_version": 2,            // 文档版本，增删改都会使版本产生变化
+  "_seq_no": 3,             // 文档序列号，用于分布式环境种保证顺序性
+  "_primary_term": 1,       // 主分片任期，用于确保在同一时间只有一个主分片处于活动状态，并保证变更操作的一致性。
+  "found": true,            // 布尔类型字段，表示请求所查找的文档是否存在。
+  "_source": {              // 文档内容
+    "name": "lindongzhai1",
+    "age": 30
+  }
+}
+```
+
+#### 6.4.2、方式二：查询所有文档
+
+```http
+GET /索引名称/_search
+```
+
+![image-20231229172554390](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229172554390.png)
+
+```json
+{
+  "took": 1,                            // 请求执行时间
+  "timed_out": false,                   // 是否超时
+  "_shards": {                          //  表示分片的相关信息
+    "total": 1,                         // 总分片数
+    "successful": 1,                    // 成功分片数
+    "skipped": 0,                       // 跳过分片数
+    "failed": 0                         // 失败分片数
+  },
+  "hits": {                             // 搜索结果信息
+    "total": {                          // 搜索结果总数的统计信息。
+      "value": 2,                       // 匹配的文档数
+      "relation": "eq"                  // 与总数量的匹配关系
+    },
+    "max_score": 1,                     // 最高得分
+    "hits": [                           // 命中的文档数组
+      {
+        "_index": "lindongzhai",        // 索引名称
+        "_id": "1taUtIwBwSyoWLhSLjGX",  // 文档ID
+        "_score": 1,                    // 文档得分
+        "_source": {                    // 文档内容
+          "name": "lindongzhai",
+          "age": 24
+        }
+      },
+      {
+        "_index": "lindongzhai",         // 索引名称
+        "_id": "001",                    // 文档ID
+        "_score": 1,                     // 文档得分
+        "_source": {                     // 文档内容
+          "name": "lindongzhai1",
+          "age": 30
+        }
+      }
+    ]
+  }
+}
+```
 
 
 
@@ -401,7 +1249,40 @@ DELETE /indexName
 
 ### 7.1、基础搜索
 
+#### 7.1.1、完全匹配查询
+
+```http
+GET /apidoc/_search
+{
+  "query": {
+    "match": {
+      "name": "zhangsan"
+    }
+  }
+}
+```
+
+![image-20240102143022381](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20240102143022381.png)
+
+#### 7.1.2、只查询指定字段
+
+```http
+GET /apidoc/_search
+{
+  "_source": ["name", "age"],
+  "query": {
+    "match": {
+      "name": "zhangsan"
+    }
+  }
+}
+```
+
+![image-20240102172006063](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20240102172006063.png)
+
 ### 7.2、聚合搜索
+
+
 
 ## 八、索引模板
 
@@ -419,7 +1300,23 @@ DELETE /indexName
 
 <font color="Orange">注意：安装的版本需与ElasticSearch版本一致</font>
 
-> 下载地址：https://github.com/medcl/elasticsearch-analysis-ik/releases
+* 手动安装
+
+	> 下载地址：https://github.com/medcl/elasticsearch-analysis-ik/releases
+
+	```sh
+	mkdir -p ES安装目录/plugins/ik
+	unzip elasticsearch-analysis-ik-8.11.3.zip -d ES安装目录/plugins/ik
+	docker restart ES-contains
+	```
+
+* ES命令安装
+
+  ```sh
+  cd ES安装目录/
+  ```
+
+  
 
 
 
@@ -495,7 +1392,41 @@ docker run --name kib01 --net elastic -p 5601:5601 -d docker.elastic.co/kibana/k
 
 #### 2.2、Windows 安装
 
+<font color="Orange">注意：需要安装java17+</font>
+
+> 官方教程：https://www.elastic.co/guide/en/kibana/8.11/windows.html
+
+> 下载地址：https://artifacts.elastic.co/downloads/kibana/kibana-8.11.3-windows-x86_64.zip
+
+
+
 #### 2.3、Linux 安装
+
+> 官方教程：https://www.elastic.co/guide/en/kibana/8.11/rpm.html#rpm-repo
+
+* yum 安装
+
+  ```shell
+  sudo yum install kibana
+  ```
+
+* dnf 安装
+
+  ```shell
+  sudo dnf install kibana
+  ```
+
+* zypper 安装
+
+  ```shell
+  sudo zypper install kibana
+  ```
+
+  
+
+
+
+
 
 #### 2.4、Mac 安装
 

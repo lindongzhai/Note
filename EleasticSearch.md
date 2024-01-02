@@ -68,84 +68,111 @@
 3. Airbnb：Airbnb使用Elasticsearch来处理其全球民宿预订和评价数据，并使用它的机器学习功能来优化推荐算法。
 4. LinkedIn：LinkedIn使用Elasticsearch来支持其职业社交网络的搜索和分析功能，并使用它的聚合功能来提供用户的个性化建议。
 5. Twitter：Twitter使用Elasticsearch来索引和搜索其海量的社交媒体数据，并使用它的实时搜索功能来提供用户的即时消息推送。
+5. 小米、滴滴、携程等
+
+
+
+### 1.6、ElasticSearch的由来
+
+许多年前，一个刚结婚的名叫 Shay Banon 的失业开发者，跟着他的妻子去了伦敦，他的妻子在那里学习厨师。 在寻找一个赚钱的工作的时候，为了给他的妻子做一个食谱搜索引擎，他开始使用 Lucene 的一个早期版本。
+
+直接使用 Lucene 是很难的，因此 Shay 开始做一个抽象层，Java 开发者使用它可以很简单的给他们的程序添加搜索功能。 他发布了他的第一个开源项目 Compass。
+
+后来 Shay 获得了一份工作，主要是高性能，分布式环境下的内存数据网格。这个对于高性能，实时，分布式搜索引擎的需求尤为突出， 他决定重写 Compass，把它变为一个独立的服务并取名 Elasticsearch。
+
+第一个公开版本在2010年2月发布，从此以后，Elasticsearch 已经成为了 Github 上最活跃的项目之一，他拥有超过300名 contributors(目前736名 contributors )。 一家公司已经开始围绕 Elasticsearch 提供商业服务，并开发新的特性，但是，Elasticsearch 将永远开源并对所有人可用。
+
+据说，Shay 的妻子还在等着她的食谱搜索引擎...
 
 
 
 ## 二、ElastciSearch 基础概念
 
-> Elasticsearch是面向文档(document oriented)的，这意味着它可以存储整个对象或文档(document)。然而它不仅仅是存储，还会索引(index)每个文档的内容使之可以被搜索。在Elasticsearch中，你可以对文档（而非成行成列的数据）进行索引、搜索、排序、过滤。
+Elasticsearch是面向文档(document oriented)的，这意味着它可以存储整个对象或文档(document)。然而它不仅仅是存储，还会索引(index)每个文档的内容使之可以被搜索。在Elasticsearch中，你可以对文档（而非成行成列的数据）进行索引、搜索、排序、过滤。
 
 ### 2.1、index（索引）
 
 > 简易理解：MySQL 中的数据库
 
-> 一个索引就是一个拥有几分相似特征的文档的集合。索引由一个名字来标识（必须全部是小写字母的），并且当我们要对对应于这个索引中的文档进行索引、搜索、更新和删除的时候，都要使用到这个名字。
+一个索引就是一个拥有几分相似特征的文档的集合。索引由一个名字来标识（必须全部是小写字母的），并且当我们要对对应于这个索引中的文档进行索引、搜索、更新和删除的时候，都要使用到这个名字。
+
+
 
 ### 2.2、type（类型）
 
-> <font color="Orange">注意：在 ElasticSearch8 中已经废弃，默认为 "_doc"</font>
-
 > 简易理解：MySQL 中的表
 
-> 在一个索引中，你可以定义一种或多种类型。一个类型是你的索引的一个逻辑上的分类/分区，其语义完全由你来定。通常，会为具有一组共同字段的文档定义一个类型。
+在一个索引中，你可以定义一种或多种类型。一个类型是你的索引的一个逻辑上的分类/分区，其语义完全由你来定。通常，会为具有一组共同字段的文档定义一个类型。
+
+<font color="Orange">注意：在 ElasticSearch8 中已经废弃，默认为 "_doc"</font>
+
+
 
 ### 2.3、document（文档）
 
-> <font color="Orange">注意：尽管一个文档，物理上存在于一个索引之中，文档必须被索引/赋予一个索引的type。</font>
-
 > 简易理解：MySQL 中的行记录
 
-> 一个文档是一个可被索引的基础信息单元。文档以JSON（Javascript Object Notation）格式来表示。在一个index/type里面，你可以存储任意多的文档。
+一个文档是一个可被索引的基础信息单元。文档以JSON（Javascript Object Notation）格式来表示。在一个index/type里面，你可以存储任意多的文档。
+
+<font color="Orange">注意：尽管一个文档，物理上存在于一个索引之中，文档必须被索引/赋予一个索引的type。</font>
+
+
 
 ### 2.4、Field（字段）
 
 > 简易理解：MySQL 中的字段
 
-> 对文档数据根据不同属性进行的分类标识 。
+对文档数据根据不同属性进行的分类标识 。
+
+
 
 ### 2.5、mapping（映射）
 
 > 简易理解：MySQL 中的字段定义
 
-> mapping是处理数据的方式和规则方面做一些限制，如某个字段的数据类型、默认值、分析器、是否被索引等等，这些都是映射里面可以设置的，其它就是处理es里面数据的一些使用规则设置也叫做映射，按着最优规则处理数据对性能提高很大，因此才需要建立映射，并且需要思考如何建立映射才能对性能更好。
+mapping是处理数据的方式和规则方面做一些限制，如某个字段的数据类型、默认值、分析器、是否被索引等等，这些都是映射里面可以设置的，其它就是处理es里面数据的一些使用规则设置也叫做映射，按着最优规则处理数据对性能提高很大，因此才需要建立映射，并且需要思考如何建立映射才能对性能更好。
+
+
 
 ### 2.6、cluster（集群）
 
-> <font color="Orange">注意：一个节点只能通过指定某个集群的名字来加入这个集群</font>
-
 > 简易理解：Kubernetes 中的集群
 
-> 一个集群就是由一个或多个节点组织在一起，它们共同持有整个的数据，并一起提供索引和搜索功能。一个集群由 一个唯一的名字标识，这个名字默认就是“elasticsearch”。
+一个集群就是由一个或多个节点组织在一起，它们共同持有整个的数据，并一起提供索引和搜索功能。一个集群由 一个唯一的名字标识，这个名字默认就是“elasticsearch”。
+
+<font color="Orange">注意：一个节点只能通过指定某个集群的名字来加入这个集群</font>
+
+
 
 ### 2.7、node（节点）
 
 > 简易理解：Kubernetes 中的节点
 
-> 一个节点是集群中的一个服务器，作为集群的一部分，它存储数据，参与集群的索引和搜索功能。和集群类似，一 个节点也是由一个名字来标识的，默认情况下，这个名字是一个随机的漫威漫画角色的名字，这个名字会在启动的 时候赋予节点。这个名字对于管理工作来说挺重要的，因为在这个管理过程中，你会去确定网络中的哪些服务器对 应于Elasticsearch集群中的哪些节点。
->
-> 一个节点可以通过配置集群名称的方式来加入一个指定的集群。默认情况下，每个节点都会被安排加入到一个叫 做“elasticsearch”的集群中，这意味着，如果你在你的网络中启动了若干个节点，并假定它们能够相互发现彼此， 它们将会自动地形成并加入到一个叫做“elasticsearch”的集群中。
-> 在一个集群里，只要你想，可以拥有任意多个节点。而且，如果当前你的网络中没有运行任何Elasticsearch节点， 这时启动一个节点，会默认创建并加入一个叫做“elasticsearch”的集群。
+一个节点是集群中的一个服务器，作为集群的一部分，它存储数据，参与集群的索引和搜索功能。和集群类似，一 个节点也是由一个名字来标识的，默认情况下，这个名字是一个随机的漫威漫画角色的名字，这个名字会在启动的 时候赋予节点。这个名字对于管理工作来说挺重要的，因为在这个管理过程中，你会去确定网络中的哪些服务器对 应于Elasticsearch集群中的哪些节点。
+一个节点可以通过配置集群名称的方式来加入一个指定的集群。默认情况下，每个节点都会被安排加入到一个叫 做“elasticsearch”的集群中，这意味着，如果你在你的网络中启动了若干个节点，并假定它们能够相互发现彼此， 它们将会自动地形成并加入到一个叫做“elasticsearch”的集群中。
+在一个集群里，只要你想，可以拥有任意多个节点。而且，如果当前你的网络中没有运行任何Elasticsearch节点， 这时启动一个节点，会默认创建并加入一个叫做“elasticsearch”的集群。
+
+
 
 ### 2.8、shards&replicas（分片和复制）
 
 > 简易理解：会将一个索引的文件进行分布式存储，且创建副本避免数据的丢失，类似 raid
 
-> Elasticsearch允许将索引划分为多个分片，每个分片都是功能完整的独立“索引”，可以放置在集群中的任何节点上。分片的目的主要是为了水平分割内容容量和实现分布式并行操作以提高性能/吞吐量。同时，Elasticsearch还支持创建复制分片作为主分片的备份，用于故障转移和提供高可用性。复制分片也可以帮助扩展搜索量和吞吐量，因为搜索可以在所有复制分片上并行运行。默认情况下，Elasticsearch中的每个索引包含5个主分片和1个复制，如果集群中至少有两个节点，则每个索引会有5个主分片和5个复制分片（总共10个分片）。
+Elasticsearch允许将索引划分为多个分片，每个分片都是功能完整的独立“索引”，可以放置在集群中的任何节点上。分片的目的主要是为了水平分割内容容量和实现分布式并行操作以提高性能/吞吐量。同时，Elasticsearch还支持创建复制分片作为主分片的备份，用于故障转移和提供高可用性。复制分片也可以帮助扩展搜索量和吞吐量，因为搜索可以在所有复制分片上并行运行。默认情况下，Elasticsearch中的每个索引包含5个主分片和1个复制，如果集群中至少有两个节点，则每个索引会有5个主分片和5个复制分片（总共10个分片）。
+
+
 
 ### 2.9、正排索引&倒排索引
 
 * 正排索引
 
-  > 正排索引是一种记录文档中每个单词出现在哪些文档中的数据结构。它将每个单词作为主键，对应的值是一个列表，列表中的元素是包含该单词的文档编号。这样就可以通过查询一个单词来快速获取包含这个单词的所有文档编号。
-  >
-  > | ID   | 开发语言     |
-  > | ---- | ------------ |
-  > | 1    | python       |
-  > | 2    | java         |
-  > | 3    | python，java |
-  > | 4    | golang       |
-  >
-  > 
+  * 正排索引是一种记录文档中每个单词出现在哪些文档中的数据结构。它将每个单词作为主键，对应的值是一个列表，列表中的元素是包含该单词的文档编号。这样就可以通过查询一个单词来快速获取包含这个单词的所有文档编号。
+    | ID   | 开发语言     |
+    | ---- | ------------ |
+    | 1    | python       |
+    | 2    | java         |
+    | 3    | python，java |
+    | 4    | golang       |
 
 * 倒排索引
 
@@ -275,25 +302,13 @@ $$
 
 ### 3.1、Elasticsearch配置文件（elasticsearch.yml）
 
-> 官方文档：https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html
+* 官方文档：https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html
 
-> 路径：$ES_HOME/config/elasticsearch.yml
+* 路径：$ES_HOME/config/elasticsearch.yml
 
-> 更改方法：`export ES_PATH_CONF=/path/to/my/config`
+* 更改方法：`export ES_PATH_CONF=/path/to/my/config`
 
 ```yaml
-# ======================== Elasticsearch Configuration =========================
-#
-# NOTE: Elasticsearch comes with reasonable defaults for most settings.
-#       Before you set out to tweak and tune the configuration, make sure you
-#       understand what are you trying to accomplish and the consequences.
-#
-# The primary way of configuring a node is via this file. This template lists
-# the most important settings you may want to configure for a production cluster.
-#
-# Please consult the documentation for further information on configuration options:
-# https://www.elastic.co/guide/en/elasticsearch/reference/index.html
-#
 # ---------------------------------- Cluster -----------------------------------
 # ---------------------------------- 集群配置 -----------------------------------
 # 集群名称，使用（默认注释）
@@ -306,8 +321,7 @@ node.name: node-1
 # 节点的自定义属性（默认注释）
 node.attr.rack: r1
 # 是否有资格选举 node
-node.master: true
-# 
+node.master: true 
 
 # ----------------------------------- Paths ------------------------------------
 # ----------------------------------- 路径集 ------------------------------------
@@ -350,11 +364,6 @@ action.destructive_requires_name: false
 
 #----------------------- BEGIN SECURITY AUTO CONFIGURATION -----------------------
 #----------------------- 开始安全自动配置 -----------------------
-#
-# The following settings, TLS certificates, and keys have been automatically      
-# generated to configure Elasticsearch security features on 29-12-2023 07:38:00
-#
-# --------------------------------------------------------------------------------
 
 # 是否启用安全特性
 xpack.security.enabled: true
@@ -396,68 +405,17 @@ transport.host: 0.0.0.0
 
 ### 3.2、JVM配置文件（jvm.options）
 
-> 官方文档：
->
-> https://www.oracle.com/java/technologies/javase/vmoptions-jsp.html
->
-> https://www.elastic.co/guide/en/elasticsearch/reference/8.11/advanced-configuration.html#set-jvm-options
->
-> https://www.elastic.co/guide/en/elasticsearch/reference/8.11/important-settings.html#heap-size-settings
+* 官方文档：
 
-> 配置文件路径：$ES_HOME/config/jvm.options
+  * https://www.oracle.com/java/technologies/javase/vmoptions-jsp.html
+
+  * https://www.elastic.co/guide/en/elasticsearch/reference/8.11/advanced-configuration.html#set-jvm-options
+
+  * https://www.elastic.co/guide/en/elasticsearch/reference/8.11/important-settings.html#heap-size-settings
+
+* 配置文件路径：$ES_HOME/config/jvm.options
 
 ```properties
-################################################################
-##
-## JVM configuration
-##
-################################################################
-##
-## WARNING: DO NOT EDIT THIS FILE. If you want to override the
-## JVM options in this file, or set any additional options, you
-## should create one or more files in the jvm.options.d
-## directory containing your adjustments.
-##
-## See https://www.elastic.co/guide/en/elasticsearch/reference/8.11/jvm-options.html
-## for more information.
-##
-################################################################
-
-
-
-################################################################
-## IMPORTANT: JVM heap size
-################################################################
-##
-## The heap size is automatically configured by Elasticsearch
-## based on the available memory in your system and the roles
-## each node is configured to fulfill. If specifying heap is
-## required, it should be done through a file in jvm.options.d,
-## which should be named with .options suffix, and the min and
-## max should be set to the same value. For example, to set the
-## heap to 4 GB, create a new file in the jvm.options.d
-## directory containing these lines:
-##
-## -Xms4g
-## -Xmx4g
-##
-## See https://www.elastic.co/guide/en/elasticsearch/reference/8.11/heap-size.html
-## for more information
-##
-################################################################
-
-
-################################################################
-## Expert settings
-################################################################
-##
-## All settings below here are considered expert settings. Do
-## not adjust them unless you understand what you are doing. Do
-## not edit them in this file; instead, create a new file in the
-## jvm.options.d directory containing your adjustments.
-##
-################################################################
-
 # 启用 G1 垃圾回收器。
 -XX:+UseG1GC
 
@@ -486,341 +444,15 @@ transport.host: 0.0.0.0
 
 ### 3.3、log4j2.properties
 
-> 官方文档：https://logging.apache.org/log4j/2.x/manual/configuration.html
+* 官方文档：https://logging.apache.org/log4j/2.x/manual/configuration.html
 
-> 配置文件路径：$ES_HOME/config/log4j2.properties"
+* 配置文件路径：$ES_HOME/config/log4j2.properties"
 
-```properties
-status = error
+## 四、ELastic Stack生态
 
-# 指定了一个名为“console”的日志输出器类型
-appender.console.type = Console
-# 日志输出器的名称为“console”
-appender.console.name = console
-# 日志输出器使用PatternLayout来格式化日志内容。PatternLayout允许用户通过指定模式字符串来自定义日志输出的格式。
-appender.console.layout.type = PatternLayout
-# PatternLayout的具体格式化模式
-appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %m%consoleException%n
+> Beats + Logstash + ElasticSearch + Kibana
 
-######## Server JSON ############################
-# 输出日志的方式是滚动文件，即当文件达到一定条件（如大小或时间间隔）时会自动创建新的日志文件并保存旧日志。
-appender.rolling.type = RollingFile
-# 日志输出器的名字为"rolling"
-appender.rolling.name = rolling
-# 指定了日志输出的文件名。
-# ${sys:es.logs.base_path} 表示从系统环境变量 es.logs.base_path 中获取基础日志目录路径。
-# ${sys:file.separator} 是一个系统依赖的路径分隔符（例如Windows上的"\"或Unix上的"/"）。
-# ${sys:es.logs.cluster_name}_server.json 表示加上集群名称前缀以及"_server.json"后缀，最终形成完整日志文件名，格式为 <集群名称>_server.json，并且日志内容将以JSON格式编码。
-appender.rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_server.json
-
-# 日志输出的布局格式为ECSJsonLayout。ECS代表Elastic Common Schema，是一个标准化的日志数据结构，用于方便地将日志数据导入Elasticsearch进行统一管理和分析。
-appender.rolling.layout.type = ECSJsonLayout
-# 设置了日志布局的dataset属性为"elasticsearch.server"，这个值会在生成的JSON日志中作为顶级键值对"dataset": "elasticsearch.server"出现，有助于区分不同的日志类型，并便于在Elasticsearch中进行索引和过滤。
-appender.rolling.layout.dataset = elasticsearch.server
-
-# 定义滚动产生的新日志文件的命名规则。
-# ${sys:es.logs.base_path}${sys:file.separator}：使用系统环境变量es.logs.base_path确定的基础日志路径，然后用系统路径分隔符连接；
-# ${sys:es.logs.cluster_name}：日志所属的Elasticsearch集群名称；
-# %d{yyyy-MM-dd}：日期，格式为年-月-日；
-# %i：表示文件编号，当达到某个滚动条件时自动增加；
-# .json.gz：表示日志文件扩展名为.json.gz，即压缩后的JSON格式文件。
-appender.rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}-%i.json.gz
-
-# 声明该appender使用多个策略来决定何时滚动日志。
-appender.rolling.policies.type = Policies
-# 定义了一个基于时间的触发策略，表示当达到指定的时间间隔时触发滚动。
-appender.rolling.policies.time.type = TimeBasedTriggeringPolicy
-# 设置时间间隔为1，通常会和后面的modulate配合，实现每天或者每小时滚动一次。
-appender.rolling.policies.time.interval = 1
-# 表示根据时间间隔进行调制，确保文件名中的时间戳按小时或天平滑递增（例如每天或每小时生成一个新的文件）。
-appender.rolling.policies.time.modulate = true
-# 定义了一个基于文件大小的触发策略，表示当单个日志文件大小达到某个阈值时触发滚动。
-appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
-# 设置单个日志文件的最大大小为128MB。
-appender.rolling.policies.size.size = 128MB
-
-# 使用默认的滚动策略，来管理文件编号和滚动过程。
-appender.rolling.strategy.type = DefaultRolloverStrategy
-# 表示没有文件编号的最大限制，即可以无限滚动。
-appender.rolling.strategy.fileIndex = nomax
-# 定义了一个删除动作，当不再需要某些旧日志文件时执行删除操作。
-appender.rolling.strategy.action.type = Delete
-# 指定要执行删除操作的日志文件的基础路径。
-appender.rolling.strategy.action.basepath = ${sys:es.logs.base_path}
-# 定义了一个基于文件名的条件，用于确定哪些文件应该被删除。
-appender.rolling.strategy.action.condition.type = IfFileName
-# 匹配所有以当前集群名称开头的日志文件。
-appender.rolling.strategy.action.condition.glob = ${sys:es.logs.cluster_name}-*
-# 定义了一个嵌套条件，基于累计文件大小判断是否需要删除。
-appender.rolling.strategy.action.condition.nested_condition.type = IfAccumulatedFileSize
-# 当所有匹配文件的总大小超过2GB时，执行删除动作，清除超出空间限制的旧日志文件。
-appender.rolling.strategy.action.condition.nested_condition.exceeds = 2GB
-################################################
-######## Server -  old style pattern ###########
-
-# 定义了这个日志输出器的类型为RollingFile，即滚动文件日志Appender。
-appender.rolling_old.type = RollingFile
-# 给这个日志输出器起名为"rolling_old"，可用于在其他配置段中引用。
-appender.rolling_old.name = rolling_old
-# 定义了日志文件的位置和名称。其中 ${sys:es.logs.base_path} 指定的是系统环境变量中定义的日志基本路径；${sys:file.separator} 根据操作系统使用相应的路径分隔符；${sys:es.logs.cluster_name}.log 表示日志文件名是以集群名称后跟".log"的形式。
-appender.rolling_old.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}.log
-# 说明该输出器的日志格式采用PatternLayout，可以自定义日志输出格式。
-appender.rolling_old.layout.type = PatternLayout
-# 定义了具体的日志输出格式
-# %d{ISO8601}：表示日志记录的时间，采用ISO8601格式
-appender.rolling_old.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %m%n
-# 
-appender.rolling_old.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}-%i.log.gz
-appender.rolling_old.policies.type = Policies
-appender.rolling_old.policies.time.type = TimeBasedTriggeringPolicy
-appender.rolling_old.policies.time.interval = 1
-appender.rolling_old.policies.time.modulate = true
-appender.rolling_old.policies.size.type = SizeBasedTriggeringPolicy
-appender.rolling_old.policies.size.size = 128MB
-appender.rolling_old.strategy.type = DefaultRolloverStrategy
-appender.rolling_old.strategy.fileIndex = nomax
-appender.rolling_old.strategy.action.type = Delete
-appender.rolling_old.strategy.action.basepath = ${sys:es.logs.base_path}
-appender.rolling_old.strategy.action.condition.type = IfFileName
-appender.rolling_old.strategy.action.condition.glob = ${sys:es.logs.cluster_name}-*
-appender.rolling_old.strategy.action.condition.nested_condition.type = IfAccumulatedFileSize
-appender.rolling_old.strategy.action.condition.nested_condition.exceeds = 2GB
-################################################
-
-rootLogger.level = info
-rootLogger.appenderRef.console.ref = console
-rootLogger.appenderRef.rolling.ref = rolling
-rootLogger.appenderRef.rolling_old.ref = rolling_old
-
-######## Deprecation JSON #######################
-appender.deprecation_rolling.type = RollingFile
-appender.deprecation_rolling.name = deprecation_rolling
-appender.deprecation_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_deprecation.json
-appender.deprecation_rolling.layout.type = ECSJsonLayout
-# Intentionally follows a different pattern to above
-appender.deprecation_rolling.layout.dataset = deprecation.elasticsearch
-appender.deprecation_rolling.filter.rate_limit.type = RateLimitingFilter
-
-appender.deprecation_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_deprecation-%i.json.gz
-appender.deprecation_rolling.policies.type = Policies
-appender.deprecation_rolling.policies.size.type = SizeBasedTriggeringPolicy
-appender.deprecation_rolling.policies.size.size = 1GB
-appender.deprecation_rolling.strategy.type = DefaultRolloverStrategy
-appender.deprecation_rolling.strategy.max = 4
-
-appender.header_warning.type = HeaderWarningAppender
-appender.header_warning.name = header_warning
-#################################################
-
-logger.deprecation.name = org.elasticsearch.deprecation
-logger.deprecation.level = WARN
-logger.deprecation.appenderRef.deprecation_rolling.ref = deprecation_rolling
-logger.deprecation.appenderRef.header_warning.ref = header_warning
-logger.deprecation.additivity = false
-
-######## Search slowlog JSON ####################
-appender.index_search_slowlog_rolling.type = RollingFile
-appender.index_search_slowlog_rolling.name = index_search_slowlog_rolling
-appender.index_search_slowlog_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs\
-  .cluster_name}_index_search_slowlog.json
-appender.index_search_slowlog_rolling.layout.type = ECSJsonLayout
-appender.index_search_slowlog_rolling.layout.dataset = elasticsearch.index_search_slowlog
-
-appender.index_search_slowlog_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs\
-  .cluster_name}_index_search_slowlog-%i.json.gz
-appender.index_search_slowlog_rolling.policies.type = Policies
-appender.index_search_slowlog_rolling.policies.size.type = SizeBasedTriggeringPolicy
-appender.index_search_slowlog_rolling.policies.size.size = 1GB
-appender.index_search_slowlog_rolling.strategy.type = DefaultRolloverStrategy
-appender.index_search_slowlog_rolling.strategy.max = 4
-#################################################
-
-#################################################
-logger.index_search_slowlog_rolling.name = index.search.slowlog
-logger.index_search_slowlog_rolling.level = trace
-logger.index_search_slowlog_rolling.appenderRef.index_search_slowlog_rolling.ref = index_search_slowlog_rolling
-logger.index_search_slowlog_rolling.additivity = false
-
-######## Indexing slowlog JSON ##################
-appender.index_indexing_slowlog_rolling.type = RollingFile
-appender.index_indexing_slowlog_rolling.name = index_indexing_slowlog_rolling
-appender.index_indexing_slowlog_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}\
-  _index_indexing_slowlog.json
-appender.index_indexing_slowlog_rolling.layout.type = ECSJsonLayout
-appender.index_indexing_slowlog_rolling.layout.dataset = elasticsearch.index_indexing_slowlog
-
-
-appender.index_indexing_slowlog_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}\
-  _index_indexing_slowlog-%i.json.gz
-appender.index_indexing_slowlog_rolling.policies.type = Policies
-appender.index_indexing_slowlog_rolling.policies.size.type = SizeBasedTriggeringPolicy
-appender.index_indexing_slowlog_rolling.policies.size.size = 1GB
-appender.index_indexing_slowlog_rolling.strategy.type = DefaultRolloverStrategy
-appender.index_indexing_slowlog_rolling.strategy.max = 4
-#################################################
-
-
-logger.index_indexing_slowlog.name = index.indexing.slowlog.index
-logger.index_indexing_slowlog.level = trace
-logger.index_indexing_slowlog.appenderRef.index_indexing_slowlog_rolling.ref = index_indexing_slowlog_rolling
-logger.index_indexing_slowlog.additivity = false
-
-
-logger.org_apache_pdfbox.name = org.apache.pdfbox
-logger.org_apache_pdfbox.level = off
-
-logger.org_apache_poi.name = org.apache.poi
-logger.org_apache_poi.level = off
-
-logger.org_apache_fontbox.name = org.apache.fontbox
-logger.org_apache_fontbox.level = off
-
-logger.org_apache_xmlbeans.name = org.apache.xmlbeans
-logger.org_apache_xmlbeans.level = off
-
-
-logger.com_amazonaws.name = com.amazonaws
-logger.com_amazonaws.level = warn
-
-logger.com_amazonaws_jmx_SdkMBeanRegistrySupport.name = com.amazonaws.jmx.SdkMBeanRegistrySupport
-logger.com_amazonaws_jmx_SdkMBeanRegistrySupport.level = error
-
-logger.com_amazonaws_metrics_AwsSdkMetrics.name = com.amazonaws.metrics.AwsSdkMetrics
-logger.com_amazonaws_metrics_AwsSdkMetrics.level = error
-
-logger.com_amazonaws_auth_profile_internal_BasicProfileConfigFileLoader.name = com.amazonaws.auth.profile.internal.BasicProfileConfigFileLoader
-logger.com_amazonaws_auth_profile_internal_BasicProfileConfigFileLoader.level = error
-
-logger.com_amazonaws_services_s3_internal_UseArnRegionResolver.name = com.amazonaws.services.s3.internal.UseArnRegionResolver
-logger.com_amazonaws_services_s3_internal_UseArnRegionResolver.level = error
-
-
-appender.audit_rolling.type = RollingFile
-appender.audit_rolling.name = audit_rolling
-appender.audit_rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_audit.json
-appender.audit_rolling.layout.type = PatternLayout
-appender.audit_rolling.layout.pattern = {\
-                "type":"audit", \
-                "timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss,SSSZ}"\
-                %varsNotEmpty{, "cluster.name":"%enc{%map{cluster.name}}{JSON}"}\
-                %varsNotEmpty{, "cluster.uuid":"%enc{%map{cluster.uuid}}{JSON}"}\
-                %varsNotEmpty{, "node.name":"%enc{%map{node.name}}{JSON}"}\
-                %varsNotEmpty{, "node.id":"%enc{%map{node.id}}{JSON}"}\
-                %varsNotEmpty{, "host.name":"%enc{%map{host.name}}{JSON}"}\
-                %varsNotEmpty{, "host.ip":"%enc{%map{host.ip}}{JSON}"}\
-                %varsNotEmpty{, "event.type":"%enc{%map{event.type}}{JSON}"}\
-                %varsNotEmpty{, "event.action":"%enc{%map{event.action}}{JSON}"}\
-                %varsNotEmpty{, "authentication.type":"%enc{%map{authentication.type}}{JSON}"}\
-                %varsNotEmpty{, "user.name":"%enc{%map{user.name}}{JSON}"}\
-                %varsNotEmpty{, "user.run_by.name":"%enc{%map{user.run_by.name}}{JSON}"}\
-                %varsNotEmpty{, "user.run_as.name":"%enc{%map{user.run_as.name}}{JSON}"}\
-                %varsNotEmpty{, "user.realm":"%enc{%map{user.realm}}{JSON}"}\
-                %varsNotEmpty{, "user.realm_domain":"%enc{%map{user.realm_domain}}{JSON}"}\
-                %varsNotEmpty{, "user.run_by.realm":"%enc{%map{user.run_by.realm}}{JSON}"}\
-                %varsNotEmpty{, "user.run_by.realm_domain":"%enc{%map{user.run_by.realm_domain}}{JSON}"}\
-                %varsNotEmpty{, "user.run_as.realm":"%enc{%map{user.run_as.realm}}{JSON}"}\
-                %varsNotEmpty{, "user.run_as.realm_domain":"%enc{%map{user.run_as.realm_domain}}{JSON}"}\
-                %varsNotEmpty{, "user.roles":%map{user.roles}}\
-                %varsNotEmpty{, "apikey.id":"%enc{%map{apikey.id}}{JSON}"}\
-                %varsNotEmpty{, "apikey.name":"%enc{%map{apikey.name}}{JSON}"}\
-                %varsNotEmpty{, "authentication.token.name":"%enc{%map{authentication.token.name}}{JSON}"}\
-                %varsNotEmpty{, "authentication.token.type":"%enc{%map{authentication.token.type}}{JSON}"}\
-                %varsNotEmpty{, "cross_cluster_access":%map{cross_cluster_access}}\
-                %varsNotEmpty{, "origin.type":"%enc{%map{origin.type}}{JSON}"}\
-                %varsNotEmpty{, "origin.address":"%enc{%map{origin.address}}{JSON}"}\
-                %varsNotEmpty{, "realm":"%enc{%map{realm}}{JSON}"}\
-                %varsNotEmpty{, "realm_domain":"%enc{%map{realm_domain}}{JSON}"}\
-                %varsNotEmpty{, "url.path":"%enc{%map{url.path}}{JSON}"}\
-                %varsNotEmpty{, "url.query":"%enc{%map{url.query}}{JSON}"}\
-                %varsNotEmpty{, "request.method":"%enc{%map{request.method}}{JSON}"}\
-                %varsNotEmpty{, "request.body":"%enc{%map{request.body}}{JSON}"}\
-                %varsNotEmpty{, "request.id":"%enc{%map{request.id}}{JSON}"}\
-                %varsNotEmpty{, "action":"%enc{%map{action}}{JSON}"}\
-                %varsNotEmpty{, "request.name":"%enc{%map{request.name}}{JSON}"}\
-                %varsNotEmpty{, "indices":%map{indices}}\
-                %varsNotEmpty{, "opaque_id":"%enc{%map{opaque_id}}{JSON}"}\
-                %varsNotEmpty{, "trace.id":"%enc{%map{trace.id}}{JSON}"}\
-                %varsNotEmpty{, "x_forwarded_for":"%enc{%map{x_forwarded_for}}{JSON}"}\
-                %varsNotEmpty{, "transport.profile":"%enc{%map{transport.profile}}{JSON}"}\
-                %varsNotEmpty{, "rule":"%enc{%map{rule}}{JSON}"}\
-                %varsNotEmpty{, "put":%map{put}}\
-                %varsNotEmpty{, "delete":%map{delete}}\
-                %varsNotEmpty{, "change":%map{change}}\
-                %varsNotEmpty{, "create":%map{create}}\
-                %varsNotEmpty{, "invalidate":%map{invalidate}}\
-                }%n
-# "node.name" node name from the `elasticsearch.yml` settings
-# "node.id" node id which should not change between cluster restarts
-# "host.name" unresolved hostname of the local node
-# "host.ip" the local bound ip (i.e. the ip listening for connections)
-# "origin.type" a received REST request is translated into one or more transport requests. This indicates which processing layer generated the event "rest" or "transport" (internal)
-# "event.action" the name of the audited event, eg. "authentication_failed", "access_granted", "run_as_granted", etc.
-# "authentication.type" one of "realm", "api_key", "token", "anonymous" or "internal"
-# "user.name" the subject name as authenticated by a realm
-# "user.run_by.name" the original authenticated subject name that is impersonating another one.
-# "user.run_as.name" if this "event.action" is of a run_as type, this is the subject name to be impersonated as.
-# "user.realm" the name of the realm that authenticated "user.name"
-# "user.realm_domain" if "user.realm" is under a domain, this is the name of the domain
-# "user.run_by.realm" the realm name of the impersonating subject ("user.run_by.name")
-# "user.run_by.realm_domain" if "user.run_by.realm" is under a domain, this is the name of the domain
-# "user.run_as.realm" if this "event.action" is of a run_as type, this is the realm name the impersonated user is looked up from
-# "user.run_as.realm_domain" if "user.run_as.realm" is under a domain, this is the name of the domain
-# "user.roles" the roles array of the user; these are the roles that are granting privileges
-# "apikey.id" this field is present if and only if the "authentication.type" is "api_key"
-# "apikey.name" this field is present if and only if the "authentication.type" is "api_key"
-# "authentication.token.name" this field is present if and only if the authenticating credential is a service account token
-# "authentication.token.type" this field is present if and only if the authenticating credential is a service account token
-# "cross_cluster_access" this field is present if and only if the associated authentication occurred cross cluster
-# "event.type" informs about what internal system generated the event; possible values are "rest", "transport", "ip_filter" and "security_config_change"
-# "origin.address" the remote address and port of the first network hop, i.e. a REST proxy or another cluster node
-# "realm" name of a realm that has generated an "authentication_failed" or an "authentication_successful"; the subject is not yet authenticated
-# "realm_domain" if "realm" is under a domain, this is the name of the domain
-# "url.path" the URI component between the port and the query string; it is percent (URL) encoded
-# "url.query" the URI component after the path and before the fragment; it is percent (URL) encoded
-# "request.method" the method of the HTTP request, i.e. one of GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, TRACE, CONNECT
-# "request.body" the content of the request body entity, JSON escaped
-# "request.id" a synthetic identifier for the incoming request, this is unique per incoming request, and consistent across all audit events generated by that request
-# "action" an action is the most granular operation that is authorized and this identifies it in a namespaced way (internal)
-# "request.name" if the event is in connection to a transport message this is the name of the request class, similar to how rest requests are identified by the url path (internal)
-# "indices" the array of indices that the "action" is acting upon
-# "opaque_id" opaque value conveyed by the "X-Opaque-Id" request header
-# "trace_id" an identifier conveyed by the part of "traceparent" request header
-# "x_forwarded_for" the addresses from the "X-Forwarded-For" request header, as a verbatim string value (not an array)
-# "transport.profile" name of the transport profile in case this is a "connection_granted" or "connection_denied" event
-# "rule" name of the applied rule if the "origin.type" is "ip_filter"
-# the "put", "delete", "change", "create", "invalidate" fields are only present
-# when the "event.type" is "security_config_change" and contain the security config change (as an object) taking effect
-
-appender.audit_rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}_audit-%d{yyyy-MM-dd}-%i.json.gz
-appender.audit_rolling.policies.type = Policies
-appender.audit_rolling.policies.time.type = TimeBasedTriggeringPolicy
-appender.audit_rolling.policies.time.interval = 1
-appender.audit_rolling.policies.time.modulate = true
-appender.audit_rolling.policies.size.type = SizeBasedTriggeringPolicy
-appender.audit_rolling.policies.size.size = 1GB
-appender.audit_rolling.strategy.type = DefaultRolloverStrategy
-appender.audit_rolling.strategy.fileIndex = nomax
-
-logger.xpack_security_audit_logfile.name = org.elasticsearch.xpack.security.audit.logfile.LoggingAuditTrail
-logger.xpack_security_audit_logfile.level = info
-logger.xpack_security_audit_logfile.appenderRef.audit_rolling.ref = audit_rolling
-logger.xpack_security_audit_logfile.additivity = false
-
-logger.xmlsig.name = org.apache.xml.security.signature.XMLSignature
-logger.xmlsig.level = error
-logger.samlxml_decrypt.name = org.opensaml.xmlsec.encryption.support.Decrypter
-logger.samlxml_decrypt.level = fatal
-logger.saml2_decrypt.name = org.opensaml.saml.saml2.encryption.Decrypter
-logger.saml2_decrypt.level = fatal
-```
-
-## 四、Kibana 使用
-
-
-
-
-
-
+![es-introduce-1-1](EleasticSearch.assets/es-introduce-1-1.png)
 
 ## 五、索引操作
 
@@ -833,8 +465,6 @@ PUT /indexName
 ```sh
 curl -XPUT "https://172.19.0.2:9200/lindongzhai" -H "kbn-xsrf: reporting"
 ```
-
-
 
 * 创建成功响应
 
@@ -1035,7 +665,7 @@ POST /索引名/_doc
 }
 ```
 
-![image-20231229160045214](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229160045214.png)
+![image-20231229160045214](EleasticSearch.assets/image-20231229160045214.png)
 
 ```JSON
 {
@@ -1062,7 +692,7 @@ POST /索引名/_doc/文档ID
 }
 ```
 
-![image-20231229161533300](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229161533300.png)
+![image-20231229161533300](EleasticSearch.assets/image-20231229161533300.png)
 
 ```json
 {
@@ -1089,7 +719,7 @@ PUT /索引名称/_doc/文档ID
 }
 ```
 
-![image-20231229163823898](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229163823898.png)
+![image-20231229163823898](EleasticSearch.assets/image-20231229163823898.png)
 
 ```json
 {
@@ -1122,7 +752,7 @@ POST /索引名称/_doc/文档ID
 }
 ```
 
-![image-20231229164246167](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229164246167.png)
+![image-20231229164246167](EleasticSearch.assets/image-20231229164246167.png)
 
 ```json
 {
@@ -1152,7 +782,7 @@ POST /索引名称/_doc/文档ID
 DELETE /索引名称/_doc/文档ID
 ```
 
-![image-20231229165612343](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229165612343.png)
+![image-20231229165612343](EleasticSearch.assets/image-20231229165612343.png)
 
 ```json
 {
@@ -1178,7 +808,7 @@ DELETE /索引名称/_doc/文档ID
 GET /索引名称/_doc/文档ID[?pretty=true]
 ```
 
-![image-20231229165029235](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229165029235.png)
+![image-20231229165029235](EleasticSearch.assets/image-20231229165029235.png)
 
 ```json
 {
@@ -1201,7 +831,7 @@ GET /索引名称/_doc/文档ID[?pretty=true]
 GET /索引名称/_search
 ```
 
-![image-20231229172554390](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20231229172554390.png)
+![image-20231229172554390](EleasticSearch.assets/image-20231229172554390.png)
 
 ```json
 {
@@ -1262,7 +892,7 @@ GET /apidoc/_search
 }
 ```
 
-![image-20240102143022381](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20240102143022381.png)
+![image-20240102143022381](EleasticSearch.assets/image-20240102143022381.png)
 
 #### 7.1.2、只查询指定字段
 
@@ -1278,13 +908,544 @@ GET /apidoc/_search
 }
 ```
 
-![image-20240102172006063](C:\Users\dz\AppData\Roaming\Typora\typora-user-images\image-20240102172006063.png)
+![image-20240102172006063](EleasticSearch.assets/image-20240102172006063.png)
 
 ### 7.2、聚合搜索
 
+#### 7.2.1、求平均值
 
+```http
+POST /apidoc/_search
+{
+  "aggs": {
+    "avg_age": { // 结果的字段名
+      "avg": {
+        "field": "age"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 5,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "apidoc",
+        "_id": "1001",
+        "_score": 1,
+        "_source": {
+          "id": 1001,
+          "name": "zhangsan",
+          "age": 30,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1002",
+        "_score": 1,
+        "_source": {
+          "id": 1002,
+          "name": "lisi",
+          "age": 40,
+          "city": "shanghai"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1003",
+        "_score": 1,
+        "_source": {
+          "id": 1003,
+          "name": "wangwu",
+          "age": 50,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1004",
+        "_score": 1,
+        "_source": {
+          "id": 1004,
+          "name": "zhaoliu",
+          "age": 60,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1005",
+        "_score": 1,
+        "_source": {
+          "id": 1005,
+          "name": "tianqi",
+          "age": 70,
+          "city": "shanghai"
+        }
+      }
+    ]
+  },
+  "aggregations": {
+    "avg_age": { // 名称
+      "value": 50 // 平均值
+    }
+  }
+}
+```
+
+![img](EleasticSearch.assets/image-20240102172637221.jpeg)
+
+#### 7.2.2、求和
+
+```http
+POST /apidoc/_search
+{
+  "query": {
+    "constant_score": {
+      "filter": {
+        "match": {
+          "city": "beijing"
+        }
+      }
+    }
+  },
+  "aggs": {
+    "beijing_prices": {
+      "sum": {
+        "field": "age"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 3,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "apidoc",
+        "_id": "1001",
+        "_score": 1,
+        "_source": {
+          "id": 1001,
+          "name": "zhangsan",
+          "age": 30,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1003",
+        "_score": 1,
+        "_source": {
+          "id": 1003,
+          "name": "wangwu",
+          "age": 50,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1004",
+        "_score": 1,
+        "_source": {
+          "id": 1004,
+          "name": "zhaoliu",
+          "age": 60,
+          "city": "beijing"
+        }
+      }
+    ]
+  },
+  "aggregations": {
+    "beijing_prices": {
+      "value": 140
+    }
+  }
+}
+```
+
+![image-20240102172851925](EleasticSearch.assets/image-20240102172851925.png)
+
+#### 7.2.3、最大值
+
+```http
+POST /apidoc/_search
+{
+  "aggs": {
+    "max_prices": {
+      "max": {
+        "field": "age"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 5,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "apidoc",
+        "_id": "1001",
+        "_score": 1,
+        "_source": {
+          "id": 1001,
+          "name": "zhangsan",
+          "age": 30,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1002",
+        "_score": 1,
+        "_source": {
+          "id": 1002,
+          "name": "lisi",
+          "age": 40,
+          "city": "shanghai"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1003",
+        "_score": 1,
+        "_source": {
+          "id": 1003,
+          "name": "wangwu",
+          "age": 50,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1004",
+        "_score": 1,
+        "_source": {
+          "id": 1004,
+          "name": "zhaoliu",
+          "age": 60,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1005",
+        "_score": 1,
+        "_source": {
+          "id": 1005,
+          "name": "tianqi",
+          "age": 70,
+          "city": "shanghai"
+        }
+      }
+    ]
+  },
+  "aggregations": {
+    "max_prices": {
+      "value": 70
+    }
+  }
+}
+```
+
+![image-20240102173108744](EleasticSearch.assets/image-20240102173108744.png)
+
+#### 7.2.4、TopN
+
+```http
+POST /apidoc/_search
+{
+  "aggs": {
+    "top_tags": {
+      "terms": {
+        "field": "age",
+        "order": {
+          "_key": "asc"
+        },
+        "size": 3
+      },
+      "aggs": {
+        "top_age_hits": {
+          "top_hits": {
+            "sort": [
+              {
+                "age": {
+                  "order": "desc"
+                }
+              }
+            ],
+            "_source": {
+              "includes": ["id", "name", "city", "age"]
+            },
+            "size": 2
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "took": 9,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 5,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "apidoc",
+        "_id": "1001",
+        "_score": 1,
+        "_source": {
+          "id": 1001,
+          "name": "zhangsan",
+          "age": 30,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1002",
+        "_score": 1,
+        "_source": {
+          "id": 1002,
+          "name": "lisi",
+          "age": 40,
+          "city": "shanghai"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1003",
+        "_score": 1,
+        "_source": {
+          "id": 1003,
+          "name": "wangwu",
+          "age": 50,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1004",
+        "_score": 1,
+        "_source": {
+          "id": 1004,
+          "name": "zhaoliu",
+          "age": 60,
+          "city": "beijing"
+        }
+      },
+      {
+        "_index": "apidoc",
+        "_id": "1005",
+        "_score": 1,
+        "_source": {
+          "id": 1005,
+          "name": "tianqi",
+          "age": 70,
+          "city": "shanghai"
+        }
+      }
+    ]
+  },
+  "aggregations": {
+    "top_tags": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 2,
+      "buckets": [
+        {
+          "key": 30,
+          "doc_count": 1,
+          "top_age_hits": {
+            "hits": {
+              "total": {
+                "value": 1,
+                "relation": "eq"
+              },
+              "max_score": null,
+              "hits": [
+                {
+                  "_index": "apidoc",
+                  "_id": "1001",
+                  "_score": null,
+                  "_source": {
+                    "id": 1001,
+                    "name": "zhangsan",
+                    "age": 30,
+                    "city": "beijing"
+                  },
+                  "sort": [
+                    30
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": 40,
+          "doc_count": 1,
+          "top_age_hits": {
+            "hits": {
+              "total": {
+                "value": 1,
+                "relation": "eq"
+              },
+              "max_score": null,
+              "hits": [
+                {
+                  "_index": "apidoc",
+                  "_id": "1002",
+                  "_score": null,
+                  "_source": {
+                    "id": 1002,
+                    "name": "lisi",
+                    "age": 40,
+                    "city": "shanghai"
+                  },
+                  "sort": [
+                    40
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": 50,
+          "doc_count": 1,
+          "top_age_hits": {
+            "hits": {
+              "total": {
+                "value": 1,
+                "relation": "eq"
+              },
+              "max_score": null,
+              "hits": [
+                {
+                  "_index": "apidoc",
+                  "_id": "1003",
+                  "_score": null,
+                  "_source": {
+                    "id": 1003,
+                    "name": "wangwu",
+                    "age": 50,
+                    "city": "beijing"
+                  },
+                  "sort": [
+                    50
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+![image-20240102173621471](EleasticSearch.assets/image-20240102173621471.png)
 
 ## 八、索引模板
+
+> elasticsearch 在创建索引的时候，就引入了模板的概念，你可以先设置一些通用的模板，在创建索引的时候， elasticsearch 会先根据你创建的模板对索引进行设置。  
+
+> 索引可使用预定义的模板进行创建,这个模板称作 Index templates。模板设置包括 settings 和 mappings
+
+### 8.1、创建模板
+
+```http
+PUT _template/apidoctemplate
+{
+  "index_patterns": [
+    "apidoc*"  
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards": "1"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "create_time": {
+        "type": "date",
+        "format": "yyyy/MM/dd"
+      }
+    }
+  }
+}
+```
+
+```json
+#! Legacy index templates are deprecated in favor of composable templates.
+{
+  "acknowledged": true
+}
+```
+
+
+
+
 
 ## 九、中文分词
 
@@ -1325,6 +1486,14 @@ GET /apidoc/_search
 ## 十、SDK 使用
 
 ### 7.1、Golang
+
+> github：https://github.com/elastic/go-elasticsearch
+
+#### 7.1.1
+
+```sh
+go get github.com/elastic/go-elasticsearch/v8@latest
+```
 
 
 

@@ -472,7 +472,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   }
   ```
 
-#### 3.5、总结
+#### 3.5、小结
 
 * Java的反射API提供的 `Method` 对象封装了方法的所有信息
 
@@ -485,3 +485,273 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 * 通过设置`setAccessible(true)`来访问非`public`方法；
 
 * 通过反射调用方法时，仍然遵循多态原则。
+
+
+
+### 4、调用构造方法
+
+* 通过反射创建新的实例
+
+  ```java
+  // 类名 变量命 = 类名.class.newInstance();
+  Person p = Person.class.newInstance();
+  ```
+
+  * <font color="Orange">注意：该方法只能调用类的`public`无参数构造方法</font>
+
+* `Java`的反射`API`提供了 `Constructor` 对象来调用任意的构造方法，它包含一个构造方法的所有信息
+
+  ```java
+  public class Main() {
+      public static void main(String[] args) throws Exception {
+          // 获取构造方法Integer(int)
+          Constructor cons1 = Integer.class.getConstructor(int.class);
+          // 调用构造方法
+          Integer n1 = (Integer) cons1.newInstance(123);
+          
+          // 获取构造方法Integer(String)
+          Constructor cons2 = Integer.class.getConstructor(String.class);
+          // 调用构造方法
+          Integer n2 = (Integer) cons2.newInstance("123");
+      }
+  }
+  ```
+
+* 通过 `Class` 实例获取 `Constructor` 的方法
+  * `getConstructor(Class...)`: 获取某个 `public` 的 `Constructor`
+  * `getDeclaredConstructor(Class...)`: 获取某个 `Constructor`
+  * `getConstructors()`: 获取所有 `public` 的 `Constructor`
+  * `getDeclaredConstructors()`: 获取所有 `Constructor`
+
+* <font color="Orange">注意：`Constructor` 总是当前类定义的构造方法，与父类无关。不存在多态问题</font>
+* 调用非`public`的`Constructor`时，必须首先通过`setAccessible(true)`设置允许访问。`setAccessible(true)`可能会失败。
+
+#### 4.1、小结
+
+* `Constructor`对象封装了构造方法的所有信息；
+
+* 通过`Class`实例的方法可以获取`Constructor`实例：`getConstructor()`，`getConstructors()`，`getDeclaredConstructor()`，`getDeclaredConstructors()`；
+
+* 通过`Constructor`实例可以创建一个实例对象：`newInstance(Object... parameters)`； 通过设置`setAccessible(true)`来访问非`public`构造方法。
+
+
+
+### 5、获取继承关系
+
+* 获取`Class`对象时，就说获取到这个类的类型
+
+#### 5.1、获取父类的 Class
+
+```java
+package org.lindongzhai;
+
+public class Main {
+    public static void main(String[] args) {
+        Class i = Integer.class;
+        Class n = i.getSuperclass();
+        System.out.println(n); // class java.lang.Number
+
+        Class o = n.getSuperclass();
+        System.out.println(o); // class java.lang.Object
+        System.out.println(o.getSuperclass()); // null
+    }
+}
+```
+* 非 `interface` 的 `Class` 都必定存在一个父类类型
+
+
+
+#### 5.2、获取 interface
+
+```java
+package org.lindongzhai;
+
+public class Main {
+    public static void main(String[] args) {
+        Class s = Integer.class;
+        Class[] is = s.getInterfaces();
+        for (Class i : is) {
+            System.out.println(i);
+            // interface java.lang.Comparable
+            // interface java.lang.constant.Constable
+            // interface java.lang.constant.ConstantDesc
+        }
+    }
+}
+```
+
+* <font color="Orange">注意：`getInterfaces()` 只返回当前类直接实现的接口类型，不包括父类的接口类型</font>
+
+* 所有 `interface` 的 `Class` 调用 `getSuperClass()` 返回的都是 `null`
+
+  ```java
+  package org.lindongzhai;
+  
+  public class Main {
+      public static void main(String[] args) {
+          System.out.println(java.io.DataInputStream.class.getSuperclass()); // class java.io.FilterInputStream
+          System.out.println(java.io.Closeable.class.getSuperclass()); // null
+      }
+  }
+  ```
+
+* 通过 `getInterfaces()` 可以获取接口的父接口
+
+  ```java
+  package org.lindongzhai;
+  
+  import java.io.Closeable;
+  import java.util.Arrays;
+  
+  public class Main {
+      public static void main(String[] args) {
+          System.out.println(Arrays.toString(Closeable.class.getInterfaces())); // [interface java.lang.AutoCloseable]
+      }
+  }
+  ```
+
+  * 一个类没有实现任何`interface`，那么`getInterfaces()`返回空数组。
+
+#### 5.3、继承关系
+
+* 使用 `instanceof` 判断实例是否属于某个类型
+
+  ```java
+  package org.lindongzhai;
+  
+  public class Main {
+      public static void main(String[] args) {
+          Object n = Integer.valueOf(123);
+          boolean isDouble = n instanceof Double;
+          System.out.println(isDouble); // false
+          boolean isInteger = n instanceof Integer;
+          System.out.println(isInteger); // true
+          boolean isNumber = n instanceof Number;
+          System.out.println(isNumber); // true
+          boolean isSerializable = n instanceof java.io.Serializable;
+          System.out.println(isSerializable); // true
+      }
+  }
+  ```
+
+* 使用 `isAssignableFrom()` 判断向上转型是否成立
+
+  ```java
+  package org.lindongzhai;
+  
+  public class Main {
+      public static void main(String[] args) {
+          System.out.println(Integer.class.isAssignableFrom(Integer.class)); // true
+          System.out.println(Number.class.isAssignableFrom(Integer.class)); // true
+          System.out.println(Object.class.isAssignableFrom(Integer.class)); // true
+          System.out.println(Integer.class.isAssignableFrom(Number.class)); // false
+      }
+  }
+  ```
+
+#### 5.4、小结
+
+通过`Class`对象可以获取继承关系：
+
+- `Class getSuperclass()`：获取父类类型；
+- `Class[] getInterfaces()`：获取当前类实现的所有接口。
+
+通过`Class`对象的`isAssignableFrom()`方法可以判断一个向上转型是否可以实现。
+
+
+
+### 6、动态代理
+
+* `Class` 和 `interface` 的区别
+
+  * 可以实例化 `Class` (非 `abstract`)
+  * 不能实例化 `interface`
+
+* 所有 `interface` 类型的变量总是通过某个实例向上转型并赋值给接口类型变量
+
+  ```java
+  package org.lindongzhai;
+  
+  public class Main {
+      public static void main(String[] args) {
+          CharSequence charSequence = new StringBuffer();
+      }
+  }
+  ```
+
+* java标准库提供了一种动态代理（Dynamic Proxy）的机制；可以在运行期动态创建 `interface` 实例
+
+  * 静态
+
+    ```java
+    package org.lindongzhai;
+    
+    public class Main {
+        public static void main(String[] args) {
+            HelloWorld helloWorld = new HelloWorld();
+            helloWorld.morning("ldz"); // Good morning, ldz
+        }
+    }
+    
+    interface Hello {
+        void morning(String name);
+    }
+    
+    
+    class HelloWorld implements Hello {
+        @Override
+        public void morning(String name) {
+            System.out.println("Good morning, " + name);
+        }
+    }
+    ```
+
+  * 动态
+
+    ```java
+    package org.lindongzhai;
+    
+    import java.lang.reflect.InvocationHandler;
+    import java.lang.reflect.Method;
+    import java.lang.reflect.Proxy;
+    
+    public class Main {
+        public static void main(String[] args) {
+            InvocationHandler handler = new InvocationHandler() {
+                // 实现接口需要实现的接口
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    System.out.println(method);
+                    if (method.getName().equals("morning")) {
+                        System.out.println("Good morning, " + args[0]);
+                    }
+                    return null;
+                }
+            };
+            Hello hello = (Hello) Proxy.newProxyInstance(
+                    Hello.class.getClassLoader(), // 传入 ClassLoader
+                    new Class[] { Hello.class }, // 传入要实现的接口
+                    handler // 传入处理调用方法的 InvocationHandler
+            );
+            hello.morning("Bob");
+        }
+    }
+    
+    interface Hello {
+        void morning(String name);
+    }
+    ```
+
+    * 创建流程如下
+      * 定义一个 `InvocationHandler` 实例，它负责实现接口的方法调用
+      * 通过 `Proxy.newProxyInstance()` 创建 `interface` 实例，参数如下
+        * 使用的 `ClassLoader`，通常就是接口类的 `ClassLoader`
+        * 需要实现的接口数组，至少需要传入一个接口进去
+        * 用来处理接口方法调用的 `InvocationHandler` 实例
+      * 将返回的 `Object` 强制转型为接口
+
+#### 6.1、小结
+
+* Java标准库提供了动态代理功能，允许在运行期动态创建一个接口的实例；
+
+* 动态代理是通过`Proxy`创建代理对象，然后将接口方法“代理”给`InvocationHandler`完成的。

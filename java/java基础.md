@@ -1,6 +1,4 @@
-# java 基础
-
-## 简介
+# 简介
 
 Java最早是由SUN公司（已被Oracle收购）的[詹姆斯·高斯林](https://en.wikipedia.org/wiki/James_Gosling)（高司令，人称Java之父）在上个世纪90年代初开发的一种编程语言，最初被命名为Oak，目标是针对小型家电设备的嵌入式应用，结果市场没啥反响。谁料到互联网的崛起，让Oak重新焕发了生机，于是SUN公司改造了Oak，在1995年以Java的名称正式发布，原因是Oak已经被人注册了，因此SUN注册了Java这个商标。随着互联网的高速发展，Java逐渐成为最重要的网络编程语言。
 
@@ -26,9 +24,9 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 └───────────────────────────┘
 ```
 
-## 反射
+# 反射
 
-### 1、class 类
+## 1、class 类
 
 * `class` 是由 JVM 在执行过程中动态加载的。JVM在第一次读取到一种 `class` 类型时，将其加载进内存。
 
@@ -165,13 +163,13 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 
 * `Class.newInstance()` 只能调用 `public` 的无参数构造方法。带参数的构造方法或者非 `public` 的构造方法都无法通过 `Class.newInstance()` 被调用
 
-#### 1.1、动态加载
+### 1.1、动态加载
 
 * JVM在执行Java程序的时候，并不是一次性把所有用到的class全部加载到内存，而是第一次需要用到class时才加载。
 
 * 动态加载`class`的特性对于Java程序非常重要。利用JVM动态加载`class`的特性，才能在运行期根据条件加载不同的实现类。
 
-#### 1.2、小结
+### 1.2、小结
 
 * JVM为每个加载的`class`及`interface`创建了对应的`Class`实例来保存`class`及`interface`的所有信息；
 * 获取一个`class`对应的`Class`实例后，就可以获取该`class`的所有信息；
@@ -180,7 +178,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 
 
 
-### 2、访问字段
+## 2、访问字段
 
 * 获取 `Field` 信息方法
   * `Field getField(name)`：根据字段名获取某个 `public` 的 `field`（包括父类）
@@ -236,7 +234,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
     Modifier.isStatic(m); // 是否为 static。false
     ```
 
-#### 2.1、访问字段值
+### 2.1、访问字段值
 
   * 通过 `Field.get(Object)` 获取指定实例的指定字段的指
 
@@ -287,7 +285,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   
   * 反射是一种非常规的用法，使用反射，首先代码非常繁琐，其次，它更多地是给工具或者底层框架来使用，目的是在不知道目标实例任何信息的情况下，获取特定字段的值。
 
-#### 2.2、设置字段值
+### 2.2、设置字段值
 
 * 通过 `Field.set(Object. Object)` 可以修改字段的值，第一个 `Object` 是指定实例，第二个 `Object` 是待修改的值
 
@@ -319,7 +317,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   }
   ```
 
-#### 2.3、小结
+### 2.3、小结
 
 * Java的反射API提供的`Field`类封装了字段的所有信息：
 
@@ -333,7 +331,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 
 
 
-### 3、调用方法
+## 3、调用方法
 
 * 获取所有 `Method` 信息方法
 
@@ -381,7 +379,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   * `getParameterTypes()`: 返回方法的参数类型
   * `getModifiers()`: 返回方法的修饰符
 
-#### 3.1、调用方法
+### 3.1、调用方法
 
 * 对`Method`实例调用`invoke`就相当于调用该方法，`invoke`的第一个参数是对象实例，即在哪个实例上调用该方法，后面的可变参数要与方法参数一致，否则将报错。
 
@@ -402,7 +400,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
     }
     ```
 
-#### 3.2、调用静态方法
+### 3.2、调用静态方法
 
 * 对`Method`实例调用`invoke`就相当于调用该方法，`invoke` 的第一个参数为 `null` 则为调用静态方法。
 
@@ -419,7 +417,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   }
   ```
 
-#### 3.3、调用非 `public` 方法
+### 3.3、调用非 `public` 方法
 
 * 正常情况下无法访问 `Class` 类的 `private` 方法。可以通过 `Field.setAccessible(true)` 进行忽略字段修饰符。但可能会失败；
 
@@ -445,7 +443,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   ```
 
 
-#### 3.4、多态
+### 3.4、多态
 
 * 使用反射调用方法时，仍然遵循多态原则
 
@@ -472,7 +470,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
   }
   ```
 
-#### 3.5、小结
+### 3.5、小结
 
 * Java的反射API提供的 `Method` 对象封装了方法的所有信息
 
@@ -488,7 +486,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 
 
 
-### 4、调用构造方法
+## 4、调用构造方法
 
 * 通过反射创建新的实例
 
@@ -526,7 +524,7 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 * <font color="Orange">注意：`Constructor` 总是当前类定义的构造方法，与父类无关。不存在多态问题</font>
 * 调用非`public`的`Constructor`时，必须首先通过`setAccessible(true)`设置允许访问。`setAccessible(true)`可能会失败。
 
-#### 4.1、小结
+### 4.1、小结
 
 * `Constructor`对象封装了构造方法的所有信息；
 
@@ -536,11 +534,11 @@ Java介于编译型语言和解释型语言之间。编译型语言如C、C++，
 
 
 
-### 5、获取继承关系
+## 5、获取继承关系
 
 * 获取`Class`对象时，就说获取到这个类的类型
 
-#### 5.1、获取父类的 Class
+### 5.1、获取父类的 Class
 
 ```java
 package org.lindongzhai;
@@ -561,7 +559,7 @@ public class Main {
 
 
 
-#### 5.2、获取 interface
+### 5.2、获取 interface
 
 ```java
 package org.lindongzhai;
@@ -612,7 +610,7 @@ public class Main {
 
   * 一个类没有实现任何`interface`，那么`getInterfaces()`返回空数组。
 
-#### 5.3、继承关系
+### 5.3、继承关系
 
 * 使用 `instanceof` 判断实例是否属于某个类型
 
@@ -649,7 +647,7 @@ public class Main {
   }
   ```
 
-#### 5.4、小结
+### 5.4、小结
 
 通过`Class`对象可以获取继承关系：
 
@@ -660,7 +658,7 @@ public class Main {
 
 
 
-### 6、动态代理
+## 6、动态代理
 
 * `Class` 和 `interface` 的区别
 
@@ -750,8 +748,537 @@ public class Main {
         * 用来处理接口方法调用的 `InvocationHandler` 实例
       * 将返回的 `Object` 强制转型为接口
 
-#### 6.1、小结
+### 6.1、小结
 
 * Java标准库提供了动态代理功能，允许在运行期动态创建一个接口的实例；
 
 * 动态代理是通过`Proxy`创建代理对象，然后将接口方法“代理”给`InvocationHandler`完成的。
+
+
+
+# 注解
+
+* 注解是放在java源码的类、方法、字段、参数前的一种特殊"注释"
+
+* 注释会被编译器直接忽略，注解则可以被编译器打包进入class文件
+
+* 注解是一种用作标记的"元数据"
+
+    ```java
+    // this is a component:
+    @Resource("hello")
+    public class Hello {
+        @Inject
+        int n;
+
+        @PostConstruct
+        public void hello(@Param String name) {
+            System.out.println(name);
+        }
+
+        @Override
+        public String toString() {
+            return "Hello";
+        }
+    }
+    ```
+
+* java 使用 `@interface` 来定义注解(`Annotation`)
+
+  ```java
+  package org.lindongzhai;
+  
+  public @interface Report {
+      // 可以使用 default 设定一个默认值
+      int type() default 0;
+      String level() default "info";
+      String value() default "";
+  }
+  ```
+  
+* 注解定义后也是一种 `class`
+* 所有的注解都继承自 `java.lang.annotation.Annotation`
+
+## 1、注解的作用
+
+* JVM的角度看，注解本身对代码逻辑没有任何影响，如何使用注解完全由工具决定
+* Java注解可分为三类
+  * 第一类：由编译器使用的注解；这类注解不会被编译进入 `.class` 文件，它们在编译后被编译器扔掉了
+    * `@Override`：让编译器检查该方法是否正确实现覆写
+    * `@SuppressWarnings`: 告诉编译器忽略此处代码产生的警告
+  * 第二类：由工具处理 `.class` 文件使用的注解
+    * 有些工具会在加载 `class` 的时候，对 `class` 做动态修改，实现一些特殊的功能。
+    * 这类注解会被编译进入 `.class` 文件，但加载结束后不会存在于内容中。
+    * 这类注解只被一些底层库使用，一般我们不必自己处理
+  * 第三类：在程序运行期间能够读取的注解，它们在加载后一直存在于JVM中
+    * `@PostConstruct`: 会在调用构造方法后自动被调用
+* 定义注解时可配置的参数
+  * 所有基本类型；
+  * String；
+  * 枚举类型；
+  * 基本类型、String、Class以及枚举的数组；
+  * <font color="Orange">注意：配置参数必须是常量</font>
+* 注解的配置参数可以有默认值，当缺少某个配置参数时将使用默认值
+* 大部分注解会有一个名为 `value` 的配置参数，对此参数赋值，可以只写常量，相当于省略了value参数。
+
+### 1.1、小结
+
+* 注解（Annotation）是Java语言用于工具处理的标注：
+* 注解可以配置参数，没有指定配置的参数使用默认值；
+* 如果参数名称是`value`，且只有一个参数，那么可以省略参数名称。
+
+
+
+## 2、元注解
+
+* 注解可以修饰注解，修饰其它注解的注解称为元注解。
+* java标准库已经定义了一些元注解，通常只需使用，无需编写
+
+### 2.1、@Target
+
+* `@Target` 定义 `Annotation` 能够被应用于源码的那些位置
+  * 类或接口：`ElementType.TYPE`
+  * 字段：`ElementType.FIELD`
+  * 方法：`ElementType.METHOD`
+  * 构造方法：`ElementType.CONSTRUCTOR`
+  * 方法参数：`ElementType.PARAMETER`
+* `@Target` 定义的 `value` 是 `ElementType[]` 数组，只有一个元素时，可以省略数组的写法
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface Report {
+    // 可以使用 default 设定一个默认值
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+### 2.2、@Retention
+
+* `@Retention` 定义 `Annotation` 的生命周期
+  * 仅编译期：`RetentionPolicy.SOURCE`
+  * 仅class文件：`RetentionPolicy.CLASS`
+  * 运行期：`RetentionPolicy.RUNTIME`
+
+* `@Retention` 不存在，则该 `Annotation` 默认为 `CLASS`
+* 通常自定义的 `Annotation` 都是 `RUNTIME`，务必要加上 `@Retention(RetentionPolicy.RUNTIME)`
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.FIELD, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Report {
+    // 可以使用 default 设定一个默认值
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+### 2.3、@Repeatable
+
+* `@Repeatable` 这个元注解可以定义 `Annotation` 是否可以重复
+
+```java
+package org.lindongzhai;
+
+@Report(type=1, level="debug")
+@Report(type=2, level="warning")
+public class Main {
+    public static void main(String[] args) {
+
+    }
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.*;
+
+@Repeatable(Reports.class)
+@Target(ElementType.TYPE)
+public @interface Report {
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+@Target(ElementType.TYPE)
+public @interface Reports {
+    Report[] value();
+}
+```
+
+### 2.4、@Inherited
+
+* `@Inherited` 定义子类是否可继承父类定义的 `Annotation`
+* `@Inherited` 仅针对 `@Target(ElementType.TYPE)` 类型的 `Annotation` 
+* `@Inherited` 仅针对 `Class` 的继承，对 `interface` 的继承无效
+
+```java
+package org.lindongzhai;
+
+public class Main {
+    public static void main(String[] args) {
+
+    }
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.*;
+
+@Target(ElementType.TYPE)
+public @interface Report {
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+@Target(ElementType.TYPE)
+public @interface Reports {
+    Report[] value();
+}
+```
+
+```java
+package org.lindongzhai;
+
+@Report(type = 1)
+public class Person {
+}
+```
+
+```java
+package org.lindongzhai;
+
+public class Student extends Person{
+}
+```
+
+### 2.5、小结
+
+* Java使用`@interface`定义注解；
+
+* 可定义多个参数和默认值，核心参数使用`value`名称；
+
+* 必须设置`@Target`来指定`Annotation`可以应用的范围；
+
+* 应当设置`@Retention(RetentionPolicy.RUNTIME)`便于运行期读取该`Annotation`。
+
+
+
+## 3、处理注解
+
+* 读取注解，需要使用反射API
+
+### 3.1、判断 `Annotation` 是否存在
+
+* ``Class.isAnnotationPresent(Class)`
+* `Field.isAnnotationPresent(Class)`
+* `Method.isAnnotationPresent(Class)`
+* `Constructor.isAnnotationPresent(Class)`
+
+```java
+package org.lindongzhai;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(Person.class.isAnnotationPresent(Report.class)); // true
+    }
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.*;
+
+@Target(ElementType.TYPE)
+public @interface Report {
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+@Target(ElementType.TYPE)
+public @interface Reports {
+    Report[] value();
+}
+```
+
+```java
+package org.lindongzhai;
+
+@Report(type = 1)
+public class Person {
+}
+```
+
+```java
+package org.lindongzhai;
+
+public class Student extends Person{
+}
+```
+
+### 3.2、反射API读取 `Annotation`
+
+* `Class.getAnnotation(Class)`
+* `Field.getAnnotation(Class)`
+* `Method.getAnnotation(Class)`
+* `Constructor.getAnnotation(Class)`
+
+```java
+package org.lindongzhai;
+
+public class Main {
+    public static void main(String[] args) {
+        // 方法一
+        Report report1 = Person.class.getAnnotation(Report.class);
+        if (report1 != null) {
+            System.out.println(report1.type()); // 1
+            System.out.println(report1.level()); // info
+        }
+
+        // 方法二
+        if (Person.class.isAnnotationPresent(Report.class)) {
+            Report report2 = Person.class.getAnnotation(Report.class);
+            System.out.println(report2.type()); // 1
+            System.out.println(report2.level()); // info
+        }
+    }
+}
+```
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.*;
+
+@Target(ElementType.TYPE)
+public @interface Report {
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+@Target(ElementType.TYPE)
+public @interface Reports {
+    Report[] value();
+}
+```
+
+```java
+package org.lindongzhai;
+  
+@Report(type = 1)
+public class Person {
+}
+```
+
+```java
+package org.lindongzhai;
+  
+public class Student extends Person{
+}
+```
+
+### 3.3、读取参数注解
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Method method = Person.class.getMethod("hello", int.class, String.class);
+        Annotation[][] annoys = method.getParameterAnnotations();
+        Annotation[] annoysOfName = annoys[0];
+        System.out.println(Arrays.deepToString(annoys)); // [[@org.lindongzhai.NotNull(exception=java.lang.Exception.class, value=""), @org.lindongzhai.Range(value=255, max=200, min=0)], [@org.lindongzhai.NotNull(exception=java.lang.Exception.class, value="")]]
+        for (Annotation anno : annoysOfName) {
+            if (anno instanceof Range r) {
+                System.out.println(r.max()); // 200
+            }
+            if (anno instanceof NotNull notNull) {
+                System.out.println(notNull.value());
+            }
+        }
+    }
+}
+
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.TYPE_USE})
+public @interface Range {
+    int min() default 0;
+    int max() default 255;
+    int value() default 255;
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.TYPE_USE})
+public @interface NotNull {
+    String value() default "";
+
+    Class<? extends Exception> exception() default Exception.class;
+}
+```
+
+```java
+package org.lindongzhai;
+
+@Report(type = 1)
+public class Person {
+    public void hello(@NotNull @Range(max = 200) int age, @NotNull String name) {
+    }
+}
+```
+
+### 3.4、实战
+
+```java
+package org.lindongzhai;
+
+import java.lang.reflect.Field;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Person person = new Person();
+        check(person);
+    }
+
+    static void check(Person person) throws IllegalArgumentException, ReflectiveOperationException {
+        for (Field field : person.getClass().getFields()) {
+            Range range = field.getAnnotation(Range.class);
+            if (range != null) {
+                Object value = field.get(person);
+                if (value instanceof String s) {
+                    if (s.length() < range.min() || s.length() > range.max()) {
+                        throw new IllegalArgumentException("Invalid field: " + field.getName());
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.TYPE_USE})
+public @interface Range {
+    int min() default 0;
+    int max() default 255;
+    int value() default 255;
+}
+```
+
+```java
+package org.lindongzhai;
+
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.TYPE_USE})
+public @interface NotNull {
+    String value() default "";
+
+    Class<? extends Exception> exception() default Exception.class;
+}
+```
+
+```java
+package org.lindongzhai;
+
+@Report(type = 1)
+public class Person {
+    public void hello(@NotNull @Range(max = 200) int age, @NotNull String name) {
+    }
+}
+```
+
+### 3.5、小结
+
+* 可以在运行期通过反射读取`RUNTIME`类型的注解，注意千万不要漏写`@Retention(RetentionPolicy.RUNTIME)`，否则运行期无法读取到该注解。
+
+* 可以通过程序处理注解来实现相应的功能;
+
+  - 对JavaBean的属性值按规则进行检查；
+
+  - JUnit会自动运行`@Test`标记的测试方法。
+
+
+
+# 泛型
+
+* 泛型是一种“代码模板”，可以用一套代码套用各种类型。
+
+* 
